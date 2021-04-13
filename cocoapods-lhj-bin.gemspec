@@ -5,7 +5,7 @@ require 'cocoapods-lhj-bin/gem_version.rb'
 
 Gem::Specification.new do |spec|
   spec.name          = 'cocoapods-lhj-bin'
-  spec.version       = CocoapodsLhjBin::VERSION
+  spec.version       = CBin::VERSION
   spec.authors       = ['lihaijian']
   spec.email         = ['sanan.li@qq.com']
   spec.description   = %q{A short description of cocoapods-lhj-bin.}
@@ -13,11 +13,16 @@ Gem::Specification.new do |spec|
   spec.homepage      = 'https://github.com/EXAMPLE/cocoapods-lhj-bin'
   spec.license       = 'MIT'
 
-  spec.files         = `git ls-files`.split($/)
+  spec.files = Dir["lib/**/*.rb","spec/**/*.rb","lib/**/*.plist"] + %w{README.md LICENSE.txt }
+  # spec.files         = `git ls-files`.split($/)
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ['lib']
 
-  spec.add_development_dependency 'bundler', '~> 1.3'
+  spec.add_dependency 'cocoapods'
+  spec.add_dependency 'cocoapods-generate', '~>2.0.1'
+  spec.add_dependency 'parallel'
+
+  spec.add_development_dependency 'bundler'
   spec.add_development_dependency 'rake'
 end
