@@ -158,7 +158,7 @@ module CBin
         #   iphone5,iphone5s以下的模拟器
         # >x86_64
         #   iphone6以上的模拟器
-        archs = %w[arm64]
+        archs = %w[arm64 armv7]
         # archs = %w[x86_64 arm64 armv7s i386]
         # @vendored_libraries.each do |library|
         #   archs = `lipo -info #{library}`.split & archs

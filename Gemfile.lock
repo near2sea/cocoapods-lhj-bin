@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    cocoapods-lhj-bin (0.0.1)
+    cocoapods-lhj-bin (0.0.2)
       cocoapods
       cocoapods-generate (~> 2.0.1)
       parallel
