@@ -65,6 +65,8 @@ module Pod
             end
           end
 
+          # CBin::Upload::Helper.new(@specification, @code_dependencies, @sources).upload
+
           if fail_push_specs.any?
             fail_push_specs.uniq.each do |spec|
               UI.warn "【#{spec.name} | #{spec.version}】组件spec push失败 ."

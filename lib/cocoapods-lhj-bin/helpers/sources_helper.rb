@@ -1,6 +1,4 @@
-
-
-require 'cocoapods-lhj-bin/native/sources_manager.rb'
+require 'cocoapods-lhj-bin/native/sources_manager'
 
 module CBin
   module SourcesHelper

@@ -1,4 +1,3 @@
-
 require 'cocoapods-lhj-bin/command/bin/initHotKey'
 require 'cocoapods-lhj-bin/command/bin/init'
 require 'cocoapods-lhj-bin/command/bin/archive'
@@ -6,8 +5,8 @@ require 'cocoapods-lhj-bin/command/bin/auto'
 require 'cocoapods-lhj-bin/command/bin/code'
 require 'cocoapods-lhj-bin/command/bin/update'
 require 'cocoapods-lhj-bin/command/bin/install'
+require 'cocoapods-lhj-bin/command/bin/import'
 require 'cocoapods-lhj-bin/command/bin/lhj'
-
 require 'cocoapods-lhj-bin/helpers'
 
 module Pod
