@@ -18,7 +18,8 @@ module Pod
 
         def run
           generate_header_map
-          find_all_sub_folder
+          # find_all_sub_folder
+          update_source_header
         end
 
         # @return [@header_map]
@@ -60,7 +61,13 @@ module Pod
 
         def find_all_sub_folder
           Find.find(@current_path).each do |f|
-            handler_file f if f =~ /AppDelegate.m/
+            handler_file f if f =~ /.pch/
+          end
+        end
+
+        def update_source_header
+          Dir.glob("#{@current_path}/**/*.{m,h,pch}").each do |f|
+            handler_file(f) unless f =~ /Pods/
           end
         end
 
@@ -81,21 +88,20 @@ module Pod
           str
         end
 
-        def format_string(input)
-          result = input
-          if input =~ /import/
-            regx = /"\w*.h"/
-            ma = input.match(regx)
-            if ma
-              head_key = @header_map.keys.find do |key|
-                key =~ /#{ma[0]}/
-              end
-              if head_key
-                result = input.gsub(head_key, @header_map[head_key])
-              end
-            end
+        def format_string(line)
+          result = line
+          if line =~ /#import/
+            head_key = find_head_key(line)
+            result = line.gsub(head_key, @header_map[head_key]) if head_key
           end
           result
+        end
+
+        def find_head_key(line)
+          header_reg = /"\w*.h"/
+          ma = line.match(header_reg)
+          head_key = @header_map.keys.find { |k| k =~ /#{ma[0]}/ } if ma
+          head_key
         end
       end
     end
