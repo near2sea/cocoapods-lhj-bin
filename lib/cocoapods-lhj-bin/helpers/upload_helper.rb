@@ -1,3 +1,4 @@
+require 'aliyun/oss'
 require 'cocoapods-lhj-bin/native/podfile'
 require 'cocoapods/command/gen'
 require 'cocoapods/generate'
@@ -5,6 +6,7 @@ require 'cocoapods-lhj-bin/helpers/framework_builder'
 require 'cocoapods-lhj-bin/helpers/library_builder'
 require 'cocoapods-lhj-bin/helpers/sources_helper'
 require 'cocoapods-lhj-bin/command/bin/spec/push'
+require 'cocoapods-lhj-bin/config/config'
 
 module CBin
   class Upload
@@ -15,6 +17,8 @@ module CBin
         @spec = spec
         @code_dependencies = code_dependencies
         @sources = sources
+        @client = Aliyun::OSS::Client.new(endpoint: CBin.config.oss_endpoint, access_key_id: CBin.config.oss_access_key_id, access_key_secret: CBin.config.oss_access_key_secret )
+        @bucket = @client.get_bucket(CBin.config.oss_bucket)
       end
 
       def upload
@@ -22,7 +26,7 @@ module CBin
           # 创建binary-template.podsepc
           # 上传二进制文件
           # 上传二进制 podspec
-          res_zip = curl_zip
+          res_zip = oss_zip
           if res_zip
             filename = spec_creator
             push_binary_repo(filename)
@@ -57,6 +61,20 @@ EOF
           puts "#{upload_result}"
         end
 
+        res
+      end
+
+      # oss上传
+      def oss_zip
+        zip_file = "#{CBin::Config::Builder.instance.library_file(@spec)}.zip"
+        res = File.exist?(zip_file)
+        unless res
+          zip_file = CBin::Config::Builder.instance.framework_zip_file(@spec) + ".zip"
+          res = File.exist?(zip_file)
+        end
+        if res
+          @bucket.put_object("#{@spec.name}/#{@spec.version}/#{@spec.name}.zip", :file => zip_file)
+        end
         res
       end
 

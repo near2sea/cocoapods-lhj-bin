@@ -7,6 +7,7 @@ group :development do
   gem 'cocoapods'
 
   gem 'mocha'
+  gem 'aliyun-sdk'
   gem 'bacon'
   gem 'mocha-on-bacon'
   gem 'prettybacon'
