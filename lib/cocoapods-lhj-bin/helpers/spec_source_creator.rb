@@ -119,10 +119,7 @@ module CBin
         @spec.public_header_files = binary_public_header_files
         @spec.vendored_libraries = binary_vendored_libraries
         @spec.resources = binary_resources if @spec.attributes_hash.keys.include?("resources")
-        @spec.description = <<-EOF
-         「   converted automatically by plugin cocoapods-lhj-bin   」
-          #{@spec.description}
-        EOF
+        @spec.description = @spec.description
         @spec
       end
 
@@ -175,16 +172,16 @@ module CBin
         spec_hash['platforms'] = selected_platforms.empty? ? platforms : selected_platforms
 
         @spec = Pod::Specification.from_hash(spec_hash)
-        @spec.description = <<-EOF
-         「   converted automatically by plugin cocoapods-lhj-bin  」
-          #{@spec.description}
-        EOF
+        @spec.description = @spec.description
         @spec
       end
 
+      def download_url
+        "http://#{CBin.config.oss_bucket}.#{CBin.config.oss_endpoint}/#{code_spec.root.name}/#{code_spec.version}/#{code_spec.root.name}.zip"
+      end
 
       def binary_source
-        { http: format(CBin.config.binary_download_url, code_spec.root.name, code_spec.version), type: CBin.config.download_file_type }
+        { http: download_url, type: CBin.config.download_file_type }
       end
 
       def code_spec_consumer(_platform = :ios)
@@ -196,11 +193,7 @@ module CBin
       end
 
       def binary_source_files
-        { http: format(CBin.config.binary_download_url, code_spec.root.name, code_spec.version), type: CBin.config.download_file_type }
-      end
-
-      def binary_source_files
-        "bin_#{code_spec.name}_#{code_spec.version}/Headers/*"
+        { http: download_url, type: CBin.config.download_file_type }
       end
 
       def binary_public_header_files

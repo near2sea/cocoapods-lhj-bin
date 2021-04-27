@@ -124,8 +124,12 @@ module CBin
         @spec
       end
 
+      def download_url
+        "http://#{CBin.config.oss_bucket}.#{CBin.config.oss_endpoint}/#{code_spec.root.name}/#{code_spec.version}/#{code_spec.root.name}.zip"
+      end
+
       def binary_source
-        { http: format(CBin.config.binary_download_url, code_spec.root.name, code_spec.version), type: CBin.config.download_file_type }
+        { http: download_url, type: CBin.config.download_file_type }
       end
 
       def code_spec_consumer(_platform = :ios)
@@ -134,10 +138,6 @@ module CBin
 
       def framework_contents(name)
         ["#{code_spec.root.name}.framework", "#{code_spec.root.name}.framework/Versions/A"].map { |path| "#{path}/#{name}" }
-      end
-
-      def binary_source_files
-        { http: format(CBin.config.binary_download_url, code_spec.root.name, code_spec.version), type: CBin.config.download_file_type }
       end
 
       def binary_source_files
