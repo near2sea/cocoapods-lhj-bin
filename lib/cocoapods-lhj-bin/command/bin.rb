@@ -8,6 +8,7 @@ require 'cocoapods-lhj-bin/command/bin/install'
 require 'cocoapods-lhj-bin/command/bin/import'
 require 'cocoapods-lhj-bin/command/bin/lhj'
 require 'cocoapods-lhj-bin/helpers'
+require 'cocoapods-lhj-bin/native'
 
 module Pod
   class Command
@@ -41,8 +42,6 @@ module Pod
       DESC
 
       def initialize(argv)
-        require 'cocoapods-aomi-bin/native'
-
         @help = argv.flag?('help')
         super
       end

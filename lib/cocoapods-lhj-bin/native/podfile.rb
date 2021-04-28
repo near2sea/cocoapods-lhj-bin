@@ -73,7 +73,7 @@ module Pod
 
     def valid_bin_plugin
       unless plugins.keys.include?('cocoapods-aomi-bin')
-        raise Pod::Informative, 'You should add `plugin \'cocoapods-lhj-bin\'` before using its DSL'
+        raise Pod::Informative, 'You should add `plugin \'cocoapods-aomi-bin\'` before using its DSL'
       end
     end
 
