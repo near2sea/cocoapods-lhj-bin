@@ -1,10 +1,11 @@
 PATH
   remote: .
   specs:
-    cocoapods-lhj-bin (0.0.2)
+    cocoapods-aomi-bin (0.0.3)
+      aliyun-sdk (~> 0.8.0)
       cocoapods
       cocoapods-generate (~> 2.0.1)
-      parallel
+      parallel (~> 1.20.1)
 
 GEM
   remote: https://rubygems.org/
@@ -87,7 +88,6 @@ GEM
     mime-types (3.3.1)
       mime-types-data (~> 3.2015)
     mime-types-data (3.2021.0225)
-    mini_portile2 (2.5.0)
     minitest (5.14.4)
     mocha (1.12.0)
     mocha-on-bacon (0.2.3)
@@ -96,8 +96,7 @@ GEM
     nanaimo (0.3.0)
     nap (1.1.0)
     netrc (0.11.0)
-    nokogiri (1.11.3)
-      mini_portile2 (~> 2.5.0)
+    nokogiri (1.11.3-x86_64-darwin)
       racc (~> 1.4)
     parallel (1.20.1)
     prettybacon (0.0.2)
@@ -134,7 +133,7 @@ DEPENDENCIES
   bacon
   bundler
   cocoapods
-  cocoapods-lhj-bin!
+  cocoapods-aomi-bin!
   mocha
   mocha-on-bacon
   prettybacon

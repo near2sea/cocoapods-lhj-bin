@@ -11,7 +11,7 @@ module Pod
 
     module ENVExecutor
       def execute_with_bin_plugin(&block)
-        execute_with_key(USE_PLUGINS, -> { 'cocoapods-lhj-bin' }, &block)
+        execute_with_key(USE_PLUGINS, -> { 'cocoapods-aomi-bin' }, &block)
       end
 
       def execute_with_allow_prerelease(allow_prerelease, &block)

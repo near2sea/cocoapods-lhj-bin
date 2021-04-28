@@ -41,7 +41,7 @@ module Pod
       DESC
 
       def initialize(argv)
-        require 'cocoapods-lhj-bin/native'
+        require 'cocoapods-aomi-bin/native'
 
         @help = argv.flag?('help')
         super
