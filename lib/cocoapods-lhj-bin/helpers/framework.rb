@@ -9,6 +9,7 @@ module CBin
     attr_reader :versions_path
     attr_reader :swift_module_path
     attr_reader :fwk_path
+    attr_reader :root_resources_path
 
     def initialize(name, platform)
       @name = name
@@ -20,6 +21,7 @@ module CBin
       make_framework
       make_headers
       make_resources
+      make_root_resources
       make_current_version
     end
 
@@ -75,6 +77,11 @@ module CBin
     def make_resources
       @resources_path = @versions_path + Pathname.new('Resources')
       @resources_path.mkpath unless @resources_path.exist?
+    end
+
+    def make_root_resources
+      @root_resources_path = @root_path + Pathname.new('Resources')
+      @root_resources_path.mkpath unless @root_resources_path.exist?
     end
 
     def make_root

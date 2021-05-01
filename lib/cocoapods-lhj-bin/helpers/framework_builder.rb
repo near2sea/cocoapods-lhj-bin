@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # copy from https://github.com/CocoaPods/cocoapods-packager
 
 require 'cocoapods-lhj-bin/helpers/framework'
@@ -11,7 +12,7 @@ module CBin
     class Builder
       include Pod
 #Debug下还待完成
-      def initialize(spec, file_accessor, platform, source_dir, isRootSpec = true, build_model="Debug")
+      def initialize(spec, file_accessor, platform, source_dir, isRootSpec = true, build_model='Debug')
         @spec = spec
         @source_dir = source_dir
         @file_accessor = file_accessor
@@ -22,9 +23,7 @@ module CBin
         vendored_static_frameworks = file_accessor.vendored_static_frameworks.map do |framework|
           path = framework
           extn = File.extname  path
-          if extn.downcase == '.framework'
-            path = File.join(path,File.basename(path, extn))
-          end
+          path = File.join(path,File.basename(path, extn)) if extn.downcase == '.framework'
           path
         end
 
@@ -42,9 +41,6 @@ module CBin
 
         # if CBin::Build::Utils.is_swift_module(@spec) || !CBin::Build::Utils.uses_frameworks?
         #   UI.section("Building static Library #{@spec}") do
-        #     # defines = compile
-        #
-        #     # build_sim_libraries(defines)
         #     output = framework.versions_path + Pathname.new(@spec.name)
         #
         #     build_static_library_for_ios(output)
@@ -58,9 +54,6 @@ module CBin
         # else
         #   begin
             UI.section("Building framework  #{@spec}") do
-              # defines = compile
-
-              # build_sim_libraries(defines)
               output = framework.fwk_path + Pathname.new(@spec.name)
 
               copy_static_framework_dir_for_ios
@@ -69,12 +62,6 @@ module CBin
 
               # copy_license
               copy_framework_resources
-
-              #cp_to_source_dir#
-
-            # rescue Object => exception
-            #   UI.puts exception
-            # end
           end
         # end
 
@@ -112,9 +99,7 @@ module CBin
 
       def static_libs_in_sandbox(build_dir = 'build')
         file = Dir.glob("#{build_dir}/lib#{target_name}.a")
-        unless file
-          UI.warn "file no find = #{build_dir}/lib#{target_name}.a"
-        end
+        UI.warn "file no find = #{build_dir}/lib#{target_name}.a" unless file
         file
       end
 
@@ -129,7 +114,7 @@ module CBin
           static_libs += static_libs_in_sandbox("build-#{arch}") + @vendored_libraries
         end
 
-        build_path = Pathname("build")
+        build_path = Pathname('build')
         build_path.mkpath unless build_path.exist?
 
         libs = (ios_architectures + ios_architectures_sim) .map do |arch|
@@ -158,19 +143,19 @@ module CBin
         #   iphone5,iphone5s以下的模拟器
         # >x86_64
         #   iphone6以上的模拟器
-        archs = %w[arm64 armv7]
+        %w[arm64 armv7]
         # archs = %w[x86_64 arm64 armv7s i386]
         # @vendored_libraries.each do |library|
         #   archs = `lipo -info #{library}`.split & archs
         # end
-        archs
+        
       end
 
       def ios_architectures_sim
 
-        archs = %w[x86_64]
-        # TODO 处理是否需要 i386
-        archs
+        %w[x86_64]
+        # TODO: 处理是否需要 i386
+        
       end
 
       def compile
@@ -193,7 +178,7 @@ module CBin
       end
 
       def is_debug_model
-        @build_model == "Debug"
+        @build_model == 'Debug'
       end
 
       def target_name
@@ -208,10 +193,10 @@ module CBin
 
       def xcodebuild(defines = '', args = '', build_dir = 'build', build_model = 'Debug')
 
-        unless File.exist?("Pods.xcodeproj") #cocoapods-generate v2.0.0
-          command = "xcodebuild #{defines} #{args} CONFIGURATION_BUILD_DIR=#{File.join(File.expand_path("..", build_dir), File.basename(build_dir))} clean build -configuration #{build_model} -target #{target_name} -project ./Pods/Pods.xcodeproj 2>&1"
-        else
+        if File.exist?('Pods.xcodeproj')
           command = "xcodebuild #{defines} #{args} CONFIGURATION_BUILD_DIR=#{build_dir} clean build -configuration #{build_model} -target #{target_name} -project ./Pods.xcodeproj 2>&1"
+        else #cocoapods-generate v2.0.0
+          command = "xcodebuild #{defines} #{args} CONFIGURATION_BUILD_DIR=#{File.join(File.expand_path('..', build_dir), File.basename(build_dir))} clean build -configuration #{build_model} -target #{target_name} -project ./Pods/Pods.xcodeproj 2>&1"
         end
 
         UI.message "command = #{command}"
@@ -230,14 +215,12 @@ module CBin
 
       def copy_headers
         #走 podsepc中的public_headers
-        public_headers = Array.new
+        public_headers = []
 
         #by slj 如果没有头文件，去 "Headers/Public"拿
         # if public_headers.empty?
         spec_header_dir = "./Headers/Public/#{@spec.name}"
-        unless File.exist?(spec_header_dir)
-          spec_header_dir = "./Pods/Headers/Public/#{@spec.name}"
-        end
+        spec_header_dir = "./Pods/Headers/Public/#{@spec.name}" unless File.exist?(spec_header_dir)
         raise "copy_headers #{spec_header_dir} no exist " unless File.exist?(spec_header_dir)
         Dir.chdir(spec_header_dir) do
           headers = Dir.glob('*.h')
@@ -258,9 +241,7 @@ module CBin
         # create a default 'module_map' one using it.
         if !@spec.module_map.nil?
           module_map_file = @file_accessor.module_map
-          if Pathname(module_map_file).exist?
-            module_map = File.read(module_map_file)
-          end
+          module_map = File.read(module_map_file) if Pathname(module_map_file).exist?
         elsif public_headers.map(&:basename).map(&:to_s).include?("#{@spec.name}-umbrella.h")
           module_map = <<-MAP
           framework module #{@spec.name} {
@@ -274,9 +255,7 @@ module CBin
 
         unless module_map.nil?
           UI.message "Writing module map #{module_map}"
-          unless framework.module_map_path.exist?
-            framework.module_map_path.mkpath
-          end
+          framework.module_map_path.mkpath unless framework.module_map_path.exist?
           File.write("#{framework.module_map_path}/module.modulemap", module_map)
 
           # unless framework.swift_module_path.exist?
@@ -286,20 +265,16 @@ module CBin
           archs = ios_architectures + ios_architectures_sim
           archs.map do |arch|
             swift_module = "build-#{arch}/#{@spec.name}.swiftmodule"
-            if File.directory?(swift_module)
-              FileUtils.cp_r("#{swift_module}/.", framework.swift_module_path)
-            end
+            FileUtils.cp_r("#{swift_module}/.", framework.swift_module_path) if File.directory?(swift_module)
           end
           swift_Compatibility_Header = "build-#{archs.first}/Swift\ Compatibility\ Header/#{@spec.name}-Swift.h"
           FileUtils.cp(swift_Compatibility_Header,framework.headers_path) if File.exist?(swift_Compatibility_Header)
-          info_plist_file = File.join(File.dirname(__FILE__),"info.plist")
+          info_plist_file = File.join(File.dirname(__FILE__),'info.plist')
           FileUtils.cp(info_plist_file,framework.fwk_path)
         end
       end
 
-      def copy_swift_header
-
-      end
+      def copy_swift_header; end
 
       def copy_license
         UI.message 'Copying license'
@@ -327,7 +302,7 @@ module CBin
           bundle_names.include?(bundle_name)
         end
 
-        if bundles.count > 0
+        if bundles.count.positive?
           UI.message "Copying bundle files #{bundles}"
           bundle_files = bundles.join(' ')
           `cp -rp #{bundle_files} #{framework.resources_path} 2>&1`
@@ -335,13 +310,11 @@ module CBin
 
         real_source_dir = @source_dir
         unless @isRootSpec
-          spec_source_dir = File.join(Dir.pwd,"#{@spec.name}")
-          unless File.exist?(spec_source_dir)
-            spec_source_dir = File.join(Dir.pwd,"Pods/#{@spec.name}")
-          end
+          spec_source_dir = File.join(Dir.pwd,@spec.name.to_s)
+          spec_source_dir = File.join(Dir.pwd,"Pods/#{@spec.name}") unless File.exist?(spec_source_dir)
           raise "copy_resources #{spec_source_dir} no exist " unless File.exist?(spec_source_dir)
 
-          spec_source_dir = File.join(Dir.pwd,"#{@spec.name}")
+          spec_source_dir = File.join(Dir.pwd,@spec.name.to_s)
           real_source_dir = spec_source_dir
         end
 
@@ -349,12 +322,12 @@ module CBin
           expand_paths(real_source_dir, spec.consumer(@platform).resources)
         end.compact.uniq
 
-        if resources.count == 0 && bundles.count == 0
+        if resources.count.zero? && bundles.count.zero?
           framework.delete_resources
           return
         end
 
-        if resources.count > 0
+        if resources.count.positive?
           #把 路径转义。 避免空格情况下拷贝失败
           escape_resource = []
           resources.each do |source|
@@ -385,7 +358,7 @@ module CBin
           static_libs += static_libs_in_sandbox("build-#{arch}") + @vendored_libraries
         end
 
-        build_path = Pathname("build")
+        build_path = Pathname('build')
         build_path.mkpath unless build_path.exist?
 
         libs = (ios_architectures + ios_architectures_sim) .map do |arch|
@@ -402,18 +375,14 @@ module CBin
         archs = ios_architectures + ios_architectures_sim
         framework_dir = "build-#{ios_architectures_sim.first}/#{@spec.name}.framework"
         framework_dir = "build-#{ios_architectures.first}/#{@spec.name}.framework" unless File.exist?(framework_dir)
-        unless File.exist?(framework_dir)
-          raise "#{framework_dir} path no exist"
-        end
+        raise "#{framework_dir} path no exist" unless File.exist?(framework_dir)
         File.join(Dir.pwd, "build-#{ios_architectures_sim.first}/#{@spec.name}.framework")
         FileUtils.cp_r(framework_dir, framework.root_path)
 
-        # todo 所有架构的swiftModule拷贝到 framework.swift_module_path
+        # TODO: 所有架构的swiftModule拷贝到 framework.swift_module_path
         archs.map do |arch|
           swift_module = "build-#{arch}/#{@spec.name}.framework/Modules/#{@spec.name}.swiftmodule"
-          if File.directory?(swift_module)
-            FileUtils.cp_r("#{swift_module}/.", framework.swift_module_path)
-          end
+          FileUtils.cp_r("#{swift_module}/.", framework.swift_module_path) if File.directory?(swift_module)
         end
 
         # 删除Versions 软链接
@@ -422,8 +391,14 @@ module CBin
 
       def copy_framework_resources
         resources = Dir.glob("#{framework.fwk_path + Pathname.new('Resources')}/*")
-        if resources.count == 0
-          framework.delete_resources
+        framework.delete_resources if resources.count.zero?
+
+        consumer = @spec.consumer(@platform)
+        if consumer.resource_bundles.keys.any?
+          consumer.resource_bundles.each_key do |bundle_name|
+            framework_dir = "build-arm64/#{bundle_name}.bundle"
+            FileUtils.cp_r(framework_dir, framework.root_resources_path) if File.exist?(framework_dir)
+          end
         end
       end
 
