@@ -133,7 +133,10 @@ module CBin
 
         # Resources
         extnames = []
-        extnames << '*.bundle' if code_spec_consumer.resource_bundles.any?
+        # extnames << '*.bundle' if code_spec_consumer.resource_bundles.any?
+        if code_spec_consumer.resource_bundles.any?
+          extnames += code_spec_consumer.resource_bundles.keys.map { |r| "#{r}.bundle" }
+        end
         if code_spec_consumer.resources.any?
           extnames += code_spec_consumer.resources.map { |r| File.basename(r) }
         end

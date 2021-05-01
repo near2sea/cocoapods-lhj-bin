@@ -128,7 +128,7 @@ module Pod
                                                 @framework_output,
                                                 @zip,
                                                 @spec,
-                                                false ,
+                                                false,
                                                 @config)
               builder.build
             rescue Object => exception
