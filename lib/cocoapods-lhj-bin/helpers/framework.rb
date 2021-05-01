@@ -80,7 +80,7 @@ module CBin
     end
 
     def make_root_resources
-      @root_resources_path = @root_path + Pathname.new('Resources')
+      @root_resources_path = @fwk_path + Pathname.new('Resources')
       @root_resources_path.mkpath unless @root_resources_path.exist?
     end
 
