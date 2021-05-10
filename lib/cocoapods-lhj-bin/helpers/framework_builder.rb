@@ -396,8 +396,8 @@ module CBin
         consumer = @spec.consumer(@platform)
         if consumer.resource_bundles.keys.any?
           consumer.resource_bundles.each_key do |bundle_name|
-            framework_dir = "build-arm64/#{bundle_name}.bundle"
-            FileUtils.cp_r(framework_dir, framework.root_resources_path) if File.exist?(framework_dir)
+            bundle_file = "build-arm64/#{bundle_name}.bundle"
+            `cp -fa #{bundle_file} #{framework.fwk_path.to_s}`
           end
         end
       end

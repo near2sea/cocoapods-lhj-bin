@@ -21,7 +21,6 @@ module CBin
       make_framework
       make_headers
       make_resources
-      make_root_resources
       make_current_version
     end
 
