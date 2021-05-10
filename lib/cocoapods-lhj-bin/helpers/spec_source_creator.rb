@@ -62,14 +62,16 @@ module CBin
         # @spec.vendored_frameworks = "#{code_spec.root.name}.framework"
 
         # Resources
-        extnames = []
-        extnames << '*.bundle' if code_spec_consumer.resource_bundles.any?
-        if code_spec_consumer.resources.any?
-          extnames += code_spec_consumer.resources.map { |r| File.basename(r) }
+        # extnames = []
+        # extnames << '*.bundle' if code_spec_consumer.resource_bundles.any?
+        if code_spec_consumer.resources.keys.any?
+          extnames = code_spec_consumer.resource_bundles.keys.map { |r| "#{code_spec.root.name}.framework/#{r}.bundle" }
+          @spec.resources = extnames
         end
-        if extnames.any?
-          @spec.resources = framework_contents('Resources').flat_map { |r| extnames.map { |e| "#{r}/#{e}" } }
-        end
+        # if extnames.any?
+          # @spec.resources = framework_contents('Resources').flat_map { |r| extnames.map { |e| "#{r}/#{e}" } }
+        #   @spec.resources = extnames
+        # end
 
         # Source Location
         @spec.source = binary_source
@@ -132,17 +134,18 @@ module CBin
         @spec.vendored_frameworks = "#{code_spec.root.name}.framework"
 
         # Resources
-        extnames = []
+        # extnames = []
         # extnames << '*.bundle' if code_spec_consumer.resource_bundles.any?
-        if code_spec_consumer.resource_bundles.any?
-          extnames += code_spec_consumer.resource_bundles.keys.map { |r| "#{r}.bundle" }
+        if code_spec_consumer.resource_bundles.keys.any?
+          extnames = code_spec_consumer.resource_bundles.keys.map { |r| "#{code_spec.root.name}.framework/#{r}.bundle" }
+          @spec.resources = extnames
         end
-        if code_spec_consumer.resources.any?
-          extnames += code_spec_consumer.resources.map { |r| File.basename(r) }
-        end
-        if extnames.any?
-          @spec.resources = framework_contents('Resources').flat_map { |r| extnames.map { |e| "#{r}/#{e}" } }
-        end
+        # if code_spec_consumer.resources.any?
+        #   extnames += code_spec_consumer.resources.map { |r| File.basename(r) }
+        # end
+        # if extnames.any?
+          # @spec.resources = framework_contents('Resources').flat_map { |r| extnames.map { |e| "#{r}/#{e}" } }
+        # end
 
         # Source Location
         @spec.source = binary_source
