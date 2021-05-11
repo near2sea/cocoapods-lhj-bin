@@ -6,7 +6,7 @@ Pod::HooksManager.register('cocoapods-aomi-bin', :pre_install) do |_context, _|
   require 'cocoapods-lhj-bin/native'
 
   #pod bin update || install  不走这里
-  if $ARGV[1] = 'update' || $ARGV[1] != 'install'
+  if $ARGV[1] == 'update' || $ARGV[1] == 'install'
 
   else
     # pod bin repo update 更新二进制私有源
