@@ -1,4 +1,4 @@
-require 'aliyun/oss'
+require 'cocoapods-lhj-bin/helpers/oss_helper'
 require 'cocoapods-lhj-bin/native/podfile'
 require 'cocoapods/command/gen'
 require 'cocoapods/generate'
@@ -17,8 +17,6 @@ module CBin
         @spec = spec
         @code_dependencies = code_dependencies
         @sources = sources
-        @client = Aliyun::OSS::Client.new(endpoint: CBin.config.oss_endpoint, access_key_id: CBin.config.oss_access_key_id, access_key_secret: CBin.config.oss_access_key_secret )
-        @bucket = @client.get_bucket(CBin.config.oss_bucket)
       end
 
       def upload
@@ -73,7 +71,7 @@ EOF
           res = File.exist?(zip_file)
         end
         if res
-          @bucket.put_object("#{@spec.name}/#{@spec.version}/#{@spec.name}.zip", :file => zip_file)
+          CBin::OSS::Helper.instance.upload("#{@spec.name}/#{@spec.version}/#{@spec.name}.zip", zip_file)
         end
         res
       end
