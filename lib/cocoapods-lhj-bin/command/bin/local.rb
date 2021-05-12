@@ -23,12 +23,25 @@ module Pod
           'en.lproj'
         end
 
-        def zh_dir_name
+        def zh_hans_dir_name
+          'zh-Hans.lproj'
+        end
+
+        def zh_hant_dir_name
           'zh-Hant.lproj'
         end
 
         def generate_file_name
           'Localizable.strings'
+        end
+
+        def load_yaml_from_remote
+          require 'open-uri'
+          key_map = {}
+          URI.open('http://aomi-ios-repo.oss-cn-shenzhen.aliyuncs.com/zh2hant.yml') do |f|
+            key_map = YAML.safe_load(f.read)
+          end
+          puts key_map
         end
 
         def read_csv_file
@@ -60,7 +73,12 @@ module Pod
         end
 
         def write_zh_hans_strings
-          file = File.join(@current_path, zh_dir_name, generate_file_name)
+          file = File.join(@current_path, zh_hans_dir_name, generate_file_name)
+          write_to_file(file, :zh)
+        end
+
+        def write_zh_hant_strings
+          file = File.join(@current_path, zh_hant_dir_name, generate_file_name)
           write_to_file(file, :zh)
         end
 
