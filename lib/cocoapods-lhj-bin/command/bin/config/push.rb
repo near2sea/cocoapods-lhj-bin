@@ -17,6 +17,11 @@ module Pod
             push
           end
 
+          def push_cn_hk
+            file = File.expand_path("#{Pod::Config.instance.home_dir}/zh2hant.yml")
+            CBin::OSS::Helper.instance.upload('zh2hant.yml', file)
+          end
+
           def push
             file = File.expand_path("#{Pod::Config.instance.home_dir}/bin_dev.yml")
             CBin::OSS::Helper.instance.upload('bin_dev.yml', file)
