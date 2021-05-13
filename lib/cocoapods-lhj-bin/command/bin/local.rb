@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'csv'
 
 module Pod
@@ -7,8 +8,19 @@ module Pod
       class Local < Bin
         self.summary = '生成国际化文件'
 
+        def self.options
+          [
+            %w[--key Key在csv中第几列，默认为0],
+            %w[--cn 中文在csv中第几列，默认为1],
+            %w[--en 英文文在csv中第几列，默认为2]
+          ]
+        end
+
         def initialize(argv)
           @current_path = argv.shift_argument || Dir.pwd
+          @key_col = argv.option('key').to_i || 0
+          @cn_col = argv.option('cn').to_i || 1
+          @en_col = argv.option('en').to_i || 2
           @key_map = {}
           @trans_map = {}
           @trans_map_invert = {}
@@ -19,19 +31,20 @@ module Pod
           load_trans_map
           read_csv_file
           write_en_strings
-          write_zh_hans_strings
+          write_zh_cn_strings
+          write_zh_hk_strings
         end
 
         def en_dir_name
           'en.lproj'
         end
 
-        def zh_hans_dir_name
-          'zh-Hans.lproj'
+        def zh_hk_dir_name
+          'zh-hk.lproj'
         end
 
-        def zh_hant_dir_name
-          'zh-Hant.lproj'
+        def zh_cn_dir_name
+          'zh-cn.lproj'
         end
 
         def generate_file_name
@@ -62,44 +75,69 @@ module Pod
 
         def read_csv_file
           Dir.glob("#{@current_path}/**/*.csv").each do |p|
-            CSV.foreach(p) { |row| @key_map[row[0]] = { zh: row[1], en: row[3] } unless row[0] =~ /[\u4e00-\u9fa5]/ }
+            CSV.foreach(p) { |row| @key_map[row[@key_col]] = { zh: row[@cn_col], en: row[@en_col] } unless row[0] =~ /[\u4e00-\u9fa5]/ }
           end
         end
 
-        def format_str(type)
+        def format_str(type, area = :cn)
           str = ''
           @key_map.each do |k, v|
-            reg = /#{@trans_map_invert.keys}/
-            val = v[type].gsub(reg) { |s| @trans_map_invert[s] }
+            val = v[type]
+            case area
+            when :hk
+              val = trans_zh_hk_str val
+            when :cn
+              val = trans_zh_cn_str val
+            end
             str += "\"#{k}\" = \"#{val}\";\n"
           end
           str
         end
 
-        def write_to_file(file, type)
+        def trans_zh_cn_str(input)
+          out = []
+          input.each_char do |c|
+            out << (@trans_map_invert[c] || c)
+          end
+          out.join('')
+        end
+
+        def trans_zh_hk_str(input)
+          out = []
+          input.each_char do |c|
+            out << (@trans_map[c] || c)
+          end
+          out.join('')
+        end
+
+        def write_to_file(file, contents)
           FileUtils.rm_rf(file) if File.exist?(file)
           FileUtils.mkdir_p(File.dirname(file)) unless File.exist?(File.dirname(file))
           File.open(file, 'w+') do |f|
-            str = format_str(type)
-            f.write(str)
+            f.write(contents)
           end
+        end
+
+        def generate_file(file, type)
+          content = format_str(type)
+          write_to_file(file, content)
         end
 
         def write_en_strings
           file = File.join(@current_path, en_dir_name, generate_file_name)
-          write_to_file(file, :en)
+          generate_file(file, :en)
         end
 
-        def write_zh_hans_strings
-          file = File.join(@current_path, zh_hans_dir_name, generate_file_name)
-          write_to_file(file, :zh)
+        def write_zh_cn_strings
+          file = File.join(@current_path, zh_cn_dir_name, generate_file_name)
+          generate_file(file, :zh)
         end
 
-        def write_zh_hant_strings
-          file = File.join(@current_path, zh_hant_dir_name, generate_file_name)
-          write_to_file(file, :zh)
+        def write_zh_hk_strings
+          file = File.join(@current_path, zh_hk_dir_name, generate_file_name)
+          content = format_str(:zh, :hk)
+          write_to_file(file, content)
         end
-
       end
     end
   end
