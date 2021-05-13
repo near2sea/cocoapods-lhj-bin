@@ -19,8 +19,8 @@ module Pod
         def initialize(argv)
           @current_path = argv.shift_argument || Dir.pwd
           @key_col = argv.option('key').to_i || 0
-          @cn_col = argv.option('cn').to_i || 1
-          @en_col = argv.option('en').to_i || 2
+          @cn_col = argv.option('cn', 1).to_i || 1
+          @en_col = argv.option('en', 2).to_i || 2
           @key_map = {}
           @trans_map = {}
           @trans_map_invert = {}
