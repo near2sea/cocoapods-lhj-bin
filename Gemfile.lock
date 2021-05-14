@@ -1,11 +1,11 @@
 PATH
   remote: .
   specs:
-    cocoapods-aomi-bin (0.0.9)
+    cocoapods-aomi-bin (0.1.2)
       aliyun-sdk (~> 0.8.0)
       cocoapods
       cocoapods-generate (~> 2.0.1)
-      parallel (~> 1.20.1)
+      parallel
 
 GEM
   remote: https://rubygems.org/

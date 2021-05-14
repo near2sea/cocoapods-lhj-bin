@@ -21,7 +21,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'cocoapods'
   spec.add_dependency 'cocoapods-generate', '~>2.0.1'
-  spec.add_dependency 'parallel', '~>1.20.1'
+  spec.add_dependency 'parallel'
   spec.add_dependency 'aliyun-sdk', '~>0.8.0'
 
   spec.add_development_dependency 'bundler'

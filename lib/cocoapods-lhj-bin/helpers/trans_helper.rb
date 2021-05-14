@@ -20,7 +20,6 @@ module CBin
 
       def down_load_yaml
         require 'open-uri'
-        UI.puts "开始下载简繁配置文件...\n"
         URI.open('http://aomi-ios-repo.oss-cn-shenzhen.aliyuncs.com/zh2hant.yml') do |i|
           File.open(yaml_file, 'w+') do |f|
             f.write(i.read)
