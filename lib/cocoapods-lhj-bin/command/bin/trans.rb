@@ -5,12 +5,12 @@ module Pod
   class Command
     class Bin < Command
       class Trans < Bin
-        self.summary = '文件内容简繁转换'
+        self.summary = '源码中的简繁体转换'
 
         def self.options
           [
             %w[--file-type 文件扩展名，默认为m,h,pch,xib],
-            %w[--zh-cn 转成简体中文，默认不加转成繁体]
+            %w[--zh-cn 转成简体中文，默认转成繁体]
           ]
         end
 
