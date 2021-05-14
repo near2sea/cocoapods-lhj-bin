@@ -33,7 +33,6 @@ module Pod
           @modify_file_type = argv.option('modify-file-type', 'm,h')
           @modify_format_string = argv.option('modify-format-string', 'NSLocalizedString(%s, @"")')
           @key_map = {}
-          @cn_key_map = {}
           super
         end
 
@@ -110,7 +109,10 @@ module Pod
 
         def find_key_by_cn_val(val)
           cn_key = val[2, val.length - 3]
-          @cn_key_map[cn_key]
+          index = @key_map.values.find_index do |obj|
+            /^#{cn_key}$/ =~ obj[:zh]
+          end
+          @key_map.values[index][:key] if index
         end
 
         def read_csv_file
@@ -118,10 +120,7 @@ module Pod
           Dir.glob(path).each do |p|
             CSV.foreach(p) do |row|
               key = row[@key_col]
-              unless key =~ /[\u4e00-\u9fa5]/
-                @key_map[key] = { zh: row[@cn_col], en: row[@en_col] }
-                @cn_key_map[row[@cn_col]] = key
-              end
+              @key_map[key] = { key: key, zh: row[@cn_col], en: row[@en_col] } unless key =~ /[\u4e00-\u9fa5]/
             end
           end
         end
