@@ -10,7 +10,6 @@ module Pod
 
         def self.options
           [
-            %w[--gen-csv 生成csv],
             %w[--file-type 从文件扩展名中查找中文字符串，默认为m,h],
             %w[--file-name 生成csv文件名，默认为gen_cn_key.csv]
           ]
@@ -18,7 +17,6 @@ module Pod
 
         def initialize(argv)
           @current_path = argv.shift_argument || Dir.pwd
-          @gen_csv = argv.flag?('gen-csv', false)
           @file_type = argv.option('file-type', 'm,h')
           @file_name = argv.option('file-name', 'gen_cn_key.csv')
           @cn_keys = []
@@ -39,6 +37,7 @@ module Pod
               csv << [k[:key], k[:cn], k[:en], k[:str], k[:fname], k[:dirname]]
             end
           end
+          UI.puts "生成csv文件完成.\n文件路径：#{File.absolute_path(file)}".green
         end
 
         def handle_files
