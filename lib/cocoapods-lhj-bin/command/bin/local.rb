@@ -7,7 +7,7 @@ module Pod
   class Command
     class Bin < Command
       class Local < Bin
-        self.summary = '根据中英文对照csv文件，生成国际化配置'
+        self.summary = '根据中英文对照csv文件，生成国际化配置, 及批量更新源码(使用国际化写法)'
 
         def self.options
           [
