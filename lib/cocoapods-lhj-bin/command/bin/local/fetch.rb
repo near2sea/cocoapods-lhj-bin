@@ -28,8 +28,14 @@ module Pod
           gen_csv
         end
 
+        def csv_file_name
+          file_name = @file_name
+          file_name = "#{@file_name}.csv" unless /.csv$/ =~ @file_name
+          file_name
+        end
+
         def gen_csv
-          file = File.join(@current_path, @file_name)
+          file = File.join(@current_path, csv_file_name)
           FileUtils.rm_rf(file) if File.exist?(file)
           CSV.open(file, 'wb:utf-8') do |csv|
             csv << %w[国际化key 中文 英文 原字符 所在文件 文件路径]

@@ -2,6 +2,7 @@
 
 require 'csv'
 require 'cocoapods-lhj-bin/helpers/trans_helper'
+require 'cocoapods-lhj-bin/helpers/oss_helper'
 
 module Pod
   class Command
@@ -14,7 +15,8 @@ module Pod
             %w[--key-col 国际化key在csv中第几列，默认为0],
             %w[--cn-col 中文在csv中第几列，默认为1],
             %w[--en-col 英文在csv中第几列，默认为2],
-            %w[--csv-file csv文件名，默认为当前目录下所有csv文件],
+            %w[--download-csv 云端下载cvs的文件名],
+            %w[--read-csv-file 读取csv的文件名，默认为当前目录下所有csv文件],
             %w[--gen-file 生成配置文件名，默认名为:Localizable.strings],
             %w[--modify-source 修改源码，使用国际化key代替中文字符串],
             %w[--modify-file-type 需要修改源码的文件类型，默认为m,h],
@@ -27,7 +29,8 @@ module Pod
           @key_col = argv.option('key-col', 0).to_i
           @cn_col = argv.option('cn-col', 1).to_i
           @en_col = argv.option('en-col', 2).to_i
-          @csv_file = argv.option('csv-file', '*')
+          @download_csv_files = argv.option('download-csv')
+          @read_csv_file = argv.option('read-csv-file', '*')
           @gen_file_name = argv.option('gen-file', 'Localizable.strings')
           @modify_source_flag = argv.flag?('modify-source', false)
           @modify_file_type = argv.option('modify-file-type', 'm,h')
@@ -37,7 +40,7 @@ module Pod
         end
 
         def run
-          down_load_csv_file
+          down_load_csv_file if @download_csv_files
           read_csv_file
           if @key_map.keys.length.positive?
             write_en_strings
@@ -45,32 +48,73 @@ module Pod
             write_zh_hk_strings
             handle_modify_source if @modify_source_flag
           else
-            UI.puts "获取中英文映射文件失败, 检查参数--csv-file=xx是否正常\n".red
+            UI.puts "获取中英文映射文件失败, 检查参数--read-csv-file=xx是否正常\n".red
           end
         end
 
         def en_dir_name
-          'en.lproj'
+          'local_gen/en.lproj'
         end
 
         def zh_hk_dir_name
-          'zh-hk.lproj'
+          'local_gen/zh-hk.lproj'
         end
 
         def zh_cn_dir_name
-          'zh-cn.lproj'
+          'local_gen/zh-cn.lproj'
         end
 
         def generate_file_name
           @gen_file_name
         end
 
+        def read_csv_file_name
+          file_name = @read_csv_file
+          file_name = "#{@read_csv_file}.csv" unless /.csv$/ =~ @read_csv_file
+          file_name
+        end
+
         def down_load_csv_file
-          UI.puts '云端下载中英对照csv文件'
+          UI.puts '下载中英对照csv文件...'.green
+          ary = get_download_keys
+          ary.each do |key|
+            file_name = key.split(%r{/})[2] || key
+            file = File.join(@current_path, file_name)
+            backup_csv_file file if File.exist?(file)
+            UI.puts "下载csv文件:#{key} 到目录#{file}".green
+            CBin::OSS::Helper.instance.down_load(key, file)
+          end
+        end
+
+        def backup_csv_file(file)
+          dest_file = bak_file(file)
+          UI.puts "备份csv文件:#{file} 到目录#{dest_file}".green
+          FileUtils.cp file, dest_file
+          FileUtils.rm_rf file
+        end
+
+        def bak_file(file)
+          bak_name = "bak_#{File.basename(file)}"
+          dest_file = File.join(File.dirname(file), bak_name)
+          File.exist?(dest_file) ? bak_file(dest_file) : dest_file
+        end
+
+        def get_download_keys
+          download_keys = []
+          csv_files = @download_csv_files.split(/,/).map(&:strip)
+          all_keys = CBin::OSS::Helper.instance.list.map(&:key)
+          csv_files.each do |f|
+            arr = all_keys.select { |k| %r{^csv/} =~ k && /#{f}/ =~ k }
+            if arr.count.positive?
+              arr.sort! { |a, b| b.split(%r{/})[1].to_i <=> a.split(%r{/})[1].to_i }
+              download_keys << arr[0]
+            end
+          end
+          download_keys
         end
 
         def read_csv_file
-          path = "#{@current_path}/#{@csv_file}.csv"
+          path = File.join(@current_path, read_csv_file_name)
           Dir.glob(path).each do |p|
             CSV.foreach(p) do |row|
               key = row[@key_col]
