@@ -19,6 +19,10 @@ module CBin
         @bucket.put_object(key, :file => file)
       end
 
+      def down_load(key, file)
+        @bucket.get_object(key, :file => file)
+      end
+
       def list
         @bucket.list_objects
       end

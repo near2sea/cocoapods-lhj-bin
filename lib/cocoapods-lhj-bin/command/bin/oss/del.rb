@@ -24,7 +24,7 @@ module Pod
           end
 
           def validate!
-            help! "请输入key" unless @key
+            help! '请输入key' unless @key
             super
           end
 

@@ -8,10 +8,6 @@ module Pod
         class List < OSS
           self.summary = '查看OSS列表'
 
-          def initialize(argv)
-            super
-          end
-
           def run
             objects = CBin::OSS::Helper.instance.list
             objects.each do |o|
