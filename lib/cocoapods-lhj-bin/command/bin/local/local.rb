@@ -15,10 +15,10 @@ module Pod
             %w[--cn-col 中文在csv中第几列，默认为1],
             %w[--en-col 英文在csv中第几列，默认为2],
             %w[--csv-file csv文件名，默认为当前目录下所有csv文件],
-            %w[--gen-file 生成配置文件名，默认名为: Localizable.strings],
+            %w[--gen-file 生成配置文件名，默认名为:Localizable.strings],
             %w[--modify-source 修改源码，使用国际化key代替中文字符串],
             %w[--modify-file-type 需要修改源码的文件类型，默认为m,h],
-            %w[--modify-format-string 修改为国际化后的字符格式，默认为NSLocalizedString(%s, @"")]
+            %w[--modify-format-string 修改为国际化后的字符格式，默认为NSLocalizedString(%s,@"")]
           ]
         end
 
@@ -37,6 +37,7 @@ module Pod
         end
 
         def run
+          down_load_csv_file
           read_csv_file
           if @key_map.keys.length.positive?
             write_en_strings
@@ -64,12 +65,26 @@ module Pod
           @gen_file_name
         end
 
+        def down_load_csv_file
+          UI.puts '云端下载中英对照csv文件'
+        end
+
+        def read_csv_file
+          path = "#{@current_path}/#{@csv_file}.csv"
+          Dir.glob(path).each do |p|
+            CSV.foreach(p) do |row|
+              key = row[@key_col]
+              @key_map[key] = { key: key, zh: row[@cn_col], en: row[@en_col] } unless key =~ /[\u4e00-\u9fa5]/
+            end
+          end
+        end
+
         def handle_modify_source
-          UI.puts '开始修改源码开始'
+          UI.puts '修改源码开始'
           Dir.glob("#{@current_path}/**/*.{#{@modify_file_type}}").each do |f|
             handle_modify_file f if File.stat(f).writable?
           end
-          UI.puts '开始修改源码结束'
+          UI.puts '修改源码结束'
         end
 
         def handle_modify_file(file)
@@ -113,16 +128,6 @@ module Pod
             /^#{cn_key}$/ =~ obj[:zh]
           end
           @key_map.values[index][:key] if index
-        end
-
-        def read_csv_file
-          path = "#{@current_path}/#{@csv_file}.csv"
-          Dir.glob(path).each do |p|
-            CSV.foreach(p) do |row|
-              key = row[@key_col]
-              @key_map[key] = { key: key, zh: row[@cn_col], en: row[@en_col] } unless key =~ /[\u4e00-\u9fa5]/
-            end
-          end
         end
 
         def format_str(type, area = :cn)

@@ -36,12 +36,9 @@ module CBin
       case configuration_env
       when 'release_iphoneos'
         file = config_release_iphoneos_file
-        puts "\n======  #{configuration_env} 环境 ========"
       when 'debug_iphoneos'
         file = config_debug_iphoneos_file
-        puts "\n======  #{configuration_env} 环境 ========"
       when 'dev'
-        puts "\n======  #{configuration_env} 环境 ========"
       else
         raise "\n=====  #{configuration_env} 参数有误，请检查%w[dev debug_iphoneos release_iphoneos]===="
       end

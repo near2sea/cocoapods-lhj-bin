@@ -23,6 +23,10 @@ module CBin
         @bucket.get_object(key, :file => file)
       end
 
+      def object_url(key)
+        @bucket.object_url(key, false)
+      end
+
       def list
         @bucket.list_objects
       end
