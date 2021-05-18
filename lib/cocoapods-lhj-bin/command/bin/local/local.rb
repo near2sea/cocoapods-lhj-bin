@@ -148,16 +148,19 @@ module Pod
           str
         end
 
+        def zh_ch_reg
+          /@"[^"]*[\u4e00-\u9fa5]+[^"]*"/
+        end
+
         def modify_format_string(file, line)
           result = line
-          result = handle_modify_line(file, line) if line =~ /@"[^"]*[\u4e00-\u9fa5]+[^"]*"/
+          result = handle_modify_line(file, line) if zh_ch_reg =~ line
           result
         end
 
         def handle_modify_line(file, line)
           result = line
-          reg = /@"[^"]*[\u4e00-\u9fa5]+[^"]*"/
-          ma = reg.match(line)
+          ma = zh_ch_reg.match(line)
           key = find_key_by_cn_val(file, ma[0])
           if key
             val = format(@modify_format_string, "@\"#{key}\"")

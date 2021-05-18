@@ -52,21 +52,26 @@ module Pod
           end
         end
 
+        def zh_ch_reg
+          /@"[^"]*[\u4e00-\u9fa5]+[^"]*"/
+        end
+
         def handle_file(file)
           File.open(file, 'r') do |f|
             f.each_line do |line|
-              handle_line(file, line) if line =~ /@"[^"]*[\u4e00-\u9fa5]+[^"]*"/
+              handle_line(file, line) if zh_ch_reg =~ line
             end
           end
         end
 
         def handle_line(file, line)
-          reg = /@"[^"]*[\u4e00-\u9fa5]+[^"]*"/
-          ma = reg.match(line)
-          str = ma[0]
-          key = "#{File.basename(file, '.*')}.#{rand(36**8).to_s(36)}"
-          @cn_keys << { key: key, cn: str[2, str.length - 3], en: '', str: str, dirname: File.dirname(file),
-                        fname: File.basename(file) }
+          ma = zh_ch_reg.match(line)
+          arr = ma.to_a
+          arr.each do |str|
+            key = "#{File.basename(file, '.*')}.#{rand(36**8).to_s(36)}"
+            @cn_keys << { key: key, cn: str[2, str.length - 3], en: '', str: str, dirname: File.dirname(file),
+                          fname: File.basename(file) }
+          end
         end
       end
     end
