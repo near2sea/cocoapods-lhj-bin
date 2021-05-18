@@ -88,14 +88,14 @@ module Pod
 
         def backup_csv_file(file)
           dest_file = bak_file(file)
+          FileUtils.mkdir_p(File.dirname(dest_file)) unless File.exist?(File.dirname(dest_file))
           UI.puts "备份csv文件:#{file} 到目录#{dest_file}".green
           FileUtils.cp file, dest_file
           FileUtils.rm_rf file
         end
-
+        
         def bak_file(file)
-          bak_name = "bak_#{File.basename(file)}"
-          dest_file = File.join(File.dirname(file), bak_name)
+          dest_file = File.join(File.dirname(file), 'csv_bak', File.basename(file))
           File.exist?(dest_file) ? bak_file(dest_file) : dest_file
         end
 
