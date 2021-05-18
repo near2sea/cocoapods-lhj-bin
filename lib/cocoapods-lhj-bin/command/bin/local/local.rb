@@ -75,15 +75,15 @@ module Pod
         end
 
         def down_load_csv_file
-          UI.puts '下载中英对照csv文件...'.green
           ary = get_download_keys
           ary.each do |key|
-            file_name = key.split(%r{/})[2] || key
+            file_name = File.basename(key)
             file = File.join(@current_path, file_name)
             backup_csv_file file if File.exist?(file)
-            UI.puts "下载csv文件:#{key} 到目录#{file}".green
+            UI.puts "下载csv文件:#{CBin::OSS::Helper.instance.object_url(key)} 到目录#{file}\n".green
             CBin::OSS::Helper.instance.down_load(key, file)
           end
+          UI.puts "下载云端csv文件完成 \n".green
         end
 
         def backup_csv_file(file)
@@ -93,7 +93,7 @@ module Pod
           FileUtils.cp file, dest_file
           FileUtils.rm_rf file
         end
-        
+
         def bak_file(file)
           dest_file = File.join(File.dirname(file), 'csv_bak', File.basename(file))
           File.exist?(dest_file) ? bak_file(dest_file) : dest_file
@@ -150,15 +150,15 @@ module Pod
 
         def modify_format_string(file, line)
           result = line
-          result = handle_modify_line line if line =~ /@"[^"]*[\u4e00-\u9fa5]+[^"]*"/
+          result = handle_modify_line(file, line) if line =~ /@"[^"]*[\u4e00-\u9fa5]+[^"]*"/
           result
         end
 
-        def handle_modify_line(line)
+        def handle_modify_line(file, line)
           result = line
           reg = /@"[^"]*[\u4e00-\u9fa5]+[^"]*"/
           ma = reg.match(line)
-          key = find_key_by_cn_val(ma[0])
+          key = find_key_by_cn_val(file, ma[0])
           if key
             val = format(@modify_format_string, "@\"#{key}\"")
             result = line.gsub(ma[0], val)
@@ -166,11 +166,11 @@ module Pod
           result
         end
 
-        def find_key_by_cn_val(val)
+        def find_key_by_cn_val(file, val)
+          file_name = File.basename(file, '.*')
           cn_key = val[2, val.length - 3]
-          index = @key_map.values.find_index do |obj|
-            /^#{cn_key}$/ =~ obj[:zh]
-          end
+          index = @key_map.values.find_index { |obj| /^#{cn_key}$/ =~ obj[:zh] && /^#{file_name}/ =~ obj[:key] }
+          index ||= @key_map.values.find_index { |obj| /^#{cn_key}$/ =~ obj[:zh] }
           @key_map.values[index][:key] if index
         end
 
