@@ -65,9 +65,7 @@ module Pod
         end
 
         def handle_line(file, line)
-          ma = zh_ch_reg.match(line)
-          arr = ma.to_a
-          arr.each do |str|
+          line.scan(zh_ch_reg) do |str|
             key = "#{File.basename(file, '.*')}.#{rand(36**8).to_s(36)}"
             @cn_keys << { key: key, cn: str[2, str.length - 3], en: '', str: str, dirname: File.dirname(file),
                           fname: File.basename(file) }

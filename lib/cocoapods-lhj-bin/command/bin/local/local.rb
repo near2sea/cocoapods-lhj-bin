@@ -160,11 +160,12 @@ module Pod
 
         def handle_modify_line(file, line)
           result = line
-          ma = zh_ch_reg.match(line)
-          key = find_key_by_cn_val(file, ma[0])
-          if key
-            val = format(@modify_format_string, "@\"#{key}\"")
-            result = line.gsub(ma[0], val)
+          line.scan(zh_ch_reg) do |m|
+            key = find_key_by_cn_val(file, m)
+            if key
+              val = format(@modify_format_string, "@\"#{key}\"")
+              result = result.gsub(m, val)
+            end
           end
           result
         end
