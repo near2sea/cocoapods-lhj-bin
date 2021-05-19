@@ -38,9 +38,9 @@ module Pod
           file = File.join(@current_path, csv_file_name)
           FileUtils.rm_rf(file) if File.exist?(file)
           CSV.open(file, 'wb:utf-8') do |csv|
-            csv << %w[国际化key 中文 英文 原字符 所在文件 文件路径]
+            csv << %w[国际化key 中文 英文 所在文件 文件路径]
             @cn_keys.each do |k|
-              csv << [k[:key], k[:cn], k[:en], k[:str], k[:fname], k[:dirname]]
+              csv << [k[:key], k[:cn], k[:en], k[:fname], k[:dirname]]
             end
           end
           UI.puts "生成csv文件完成.\n文件路径：#{File.absolute_path(file)}".green
