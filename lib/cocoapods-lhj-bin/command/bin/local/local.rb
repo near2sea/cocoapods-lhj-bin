@@ -126,16 +126,23 @@ module Pod
         def handle_modify_source
           UI.puts '修改源码开始'
           Dir.glob("#{@current_path}/**/*.{#{@modify_file_type}}").each do |f|
-            handle_modify_file f if File.stat(f).writable?
+            # handle_modify_file f if File.stat(f).writable?
+            if f =~ /Pods/
+              handle_modify_file(f) if f =~ %r{Pods/ML}
+            else
+              handle_modify_file(f)
+            end
           end
           UI.puts '修改源码结束'
         end
 
         def handle_modify_file(file)
+          # File.chmod(0o644, file)
           str = modify_file_string(file)
           File.open(file, 'w+') do |f|
             f.write(str)
           end
+          # File.chmod(0o444, file) if file =~ /Pods/
         end
 
         def modify_file_string(file)
@@ -173,8 +180,8 @@ module Pod
         def find_key_by_cn_val(file, val)
           file_name = File.basename(file, '.*')
           cn_key = val[2, val.length - 3]
-          index = @key_map.values.find_index { |obj| /^#{cn_key}$/ =~ obj[:zh] && /^#{file_name}/ =~ obj[:key] }
-          index ||= @key_map.values.find_index { |obj| /^#{cn_key}$/ =~ obj[:zh] }
+          index = @key_map.values.find_index { |obj| cn_key.eql?(obj[:zh]) && /^#{file_name}/ =~ obj[:key] }
+          index ||= @key_map.values.find_index { |obj| cn_key.eql?(obj[:zh]) }
           @key_map.values[index][:key] if index
         end
 
