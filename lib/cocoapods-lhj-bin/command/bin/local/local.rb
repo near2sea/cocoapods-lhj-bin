@@ -137,12 +137,12 @@ module Pod
         end
 
         def handle_modify_file(file)
-          # File.chmod(0o644, file)
+          File.chmod(0o644, file)
           str = modify_file_string(file)
           File.open(file, 'w+') do |f|
             f.write(str)
           end
-          # File.chmod(0o444, file) if file =~ /Pods/
+          File.chmod(0o444, file) if file =~ /Pods/
         end
 
         def modify_file_string(file)
@@ -180,7 +180,7 @@ module Pod
         def find_key_by_cn_val(file, val)
           file_name = File.basename(file, '.*')
           cn_key = val[2, val.length - 3]
-          index = @key_map.values.find_index { |obj| cn_key.eql?(obj[:zh]) && /^#{file_name}/ =~ obj[:key] }
+          index = @key_map.values.find_index { |obj| cn_key.eql?(obj[:zh]) && /#{file_name}/ =~ obj[:key] }
           index ||= @key_map.values.find_index { |obj| cn_key.eql?(obj[:zh]) }
           @key_map.values[index][:key] if index
         end
