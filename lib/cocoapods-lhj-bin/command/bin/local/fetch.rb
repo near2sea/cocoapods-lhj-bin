@@ -68,10 +68,27 @@ module Pod
 
         def handle_line(file, line)
           line.scan(zh_ch_reg) do |str|
-            key = "#{File.basename(file, '.*')}.#{rand(36**8).to_s(36)}"
-            @cn_keys << { key: key, cn: str[2, str.length - 3], en: '', str: str, dirname: File.dirname(file),
-                          fname: File.basename(file) }
+            fname = File.basename(file)
+            dir_name = File.dirname(file)
+            mod_name = framework_name(dir_name)
+            key = "#{mod_name}.#{File.basename(file, '.*')}.#{rand(36**8).to_s(36)}"
+            cn_str = str[2, str.length - 3]
+            en_str = cn_str.gsub(/[\u4e00-\u9fa5]/, 'x')
+            @cn_keys << { key: key, cn: cn_str, en: en_str, fname: fname, dirname: dir_name }
           end
+        end
+
+        def framework_name(path)
+          mod_name = 'Main'
+          if /pods/i =~ path
+            ary = path.split('/')
+            index = ary.find_index { |p| p.eql?('Pods') }
+            if index
+              i = index + 1
+              mod_name = ary[i]
+            end
+          end
+          mod_name
         end
 
         def handle_static_line(file, line)
