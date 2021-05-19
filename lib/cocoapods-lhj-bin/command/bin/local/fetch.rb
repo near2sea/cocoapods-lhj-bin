@@ -20,12 +20,14 @@ module Pod
           @file_type = argv.option('file-type', 'm,h')
           @file_name = argv.option('file-name', 'gen_cn_key.csv')
           @cn_keys = []
+          @key_map = {}
           super
         end
 
         def run
           handle_files
           gen_csv
+          # update_source_header
         end
 
         def csv_file_name
@@ -71,6 +73,57 @@ module Pod
                           fname: File.basename(file) }
           end
         end
+
+        def handle_static_line(file, line)
+          line.scan(zh_ch_reg) do |str|
+            ma = line.match(/\*.*=/)
+            key = ma[0][1, ma[0].length - 2].strip
+            @key_map[key.to_sym] = str
+          end
+        end
+
+        def update_source_header
+          Dir.glob("#{@current_path}/**/*.{m,h}").each do |f|
+            if f =~ /Pods/
+              handler_file(f) if f =~ %r{Pods/MLF} || f =~ %r{Pods/MLU} || f =~ %r{Pods/MLN}
+            else
+              handler_file(f)
+            end
+          end
+        end
+
+        def handler_file(file)
+          puts "#{File.absolute_path(file)} \n"
+          File.chmod(0o644, file)
+          str = file_string(file)
+          File.open(file, 'w+') do |f|
+            f.write(str)
+          end
+          File.chmod(0o444, file) if file =~ /Pods/
+        end
+
+        def file_string(file)
+          str = ''
+          File.open(file, 'r+') do |f|
+            f.each_line do |line|
+              str += format_string(f, line)
+            end
+          end
+          str
+        end
+
+        def format_string(file, line)
+          result = line
+          unless /static/ =~ line
+            @key_map.each_key do |key|
+              n_key = /#{key.to_s}\s/
+              n_val = "#{@key_map[key]}\s"
+              result = result.gsub(n_key, n_val)
+            end
+          end
+          result
+        end
+
       end
     end
   end
