@@ -45,8 +45,8 @@ module Pod
           read_csv_file
           if @key_map.keys.length.positive?
             write_en_strings
-            write_zh_cn_strings if CBin::LocalConfig.instance.config['gen_zh_cn']
             write_zh_hk_strings
+            write_zh_cn_strings
             handle_modify_source if @modify_source_flag
           else
             UI.puts "获取中英文映射文件失败, 检查参数--read-csv-file=xx是否正常\n".red
@@ -229,12 +229,27 @@ module Pod
         end
 
         def write_zh_cn_strings
+          if CBin::LocalConfig.instance.config['gen_zh_cn']
+            gen_zh_cn_strings_file
+          else
+            copy_hk_to_cn_file
+          end
+        end
+
+        def gen_zh_cn_strings_file
           file = File.join(@current_path, zh_cn_dir_name, generate_file_name)
           area = :origin
           area = :cn if CBin::LocalConfig.instance.config['trans_zh_cn']
           content = format_str(:zh, area)
           write_to_file(file, content)
           UI.puts "生成简体中文配置完成.文件路径：#{File.absolute_path(file)}\n".green
+        end
+
+        def copy_hk_to_cn_file
+          source_file = File.join(@current_path, zh_hk_dir_name, generate_file_name)
+          dest_file = File.join(@current_path, zh_cn_dir_name, generate_file_name)
+          FileUtils.cp source_file, dest_file
+          UI.puts "繁体中文配置覆盖简体中文配置\n".green
         end
 
         def write_zh_hk_strings
