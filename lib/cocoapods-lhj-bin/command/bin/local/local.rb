@@ -3,6 +3,7 @@
 require 'csv'
 require 'cocoapods-lhj-bin/helpers/trans_helper'
 require 'cocoapods-lhj-bin/helpers/oss_helper'
+require 'cocoapods-lhj-bin/config/local_config'
 
 module Pod
   class Command
@@ -26,21 +27,21 @@ module Pod
 
         def initialize(argv)
           @current_path = argv.shift_argument || Dir.pwd
-          @key_col = argv.option('key-col', 0).to_i
-          @cn_col = argv.option('cn-col', 1).to_i
-          @en_col = argv.option('en-col', 2).to_i
+          @key_col = argv.option('key-col', CBin::LocalConfig.instance.config['csv_key_col']).to_i
+          @cn_col = argv.option('cn-col', CBin::LocalConfig.instance.config['csv_cn_col']).to_i
+          @en_col = argv.option('en-col', CBin::LocalConfig.instance.config['csv_en_col']).to_i
           @download_csv_files = argv.option('download-csv')
-          @read_csv_file = argv.option('read-csv-file', '*')
-          @gen_file_name = argv.option('gen-file', 'Localizable.strings')
+          @read_csv_file = argv.option('read-csv-file', CBin::LocalConfig.instance.config['read_csv_file'])
+          @gen_file_name = argv.option('gen-file', CBin::LocalConfig.instance.config['gen_file_name'])
           @modify_source_flag = argv.flag?('modify-source', false)
           @modify_file_type = argv.option('modify-file-type', 'm,h')
-          @modify_format_string = argv.option('modify-format-string', 'NSLocalizedString(%s, @"")')
+          @modify_format_string = argv.option('modify-format-string', CBin::LocalConfig.instance.config['source_format_string'])
           @key_map = {}
           super
         end
 
         def run
-          down_load_csv_file if @download_csv_files
+          down_load_csv_file if need_download
           read_csv_file
           if @key_map.keys.length.positive?
             write_en_strings
@@ -53,19 +54,27 @@ module Pod
         end
 
         def en_dir_name
-          'local_gen/en.lproj'
+          CBin::LocalConfig.instance.config['gen_en_dir']
         end
 
         def zh_hk_dir_name
-          'local_gen/zh-hk.lproj'
+          CBin::LocalConfig.instance.config['gen_zh_hk_dir']
         end
 
         def zh_cn_dir_name
-          'local_gen/zh-cn.lproj'
+          CBin::LocalConfig.instance.config['gen_zh_cn_dir']
         end
 
         def generate_file_name
           @gen_file_name
+        end
+
+        def need_download
+          @download_csv_files || CBin::LocalConfig.instance.config['download']
+        end
+
+        def download_cvs_str
+          @download_csv_files || CBin::LocalConfig.instance.config['download_csv']
         end
 
         def read_csv_file_name
@@ -101,7 +110,7 @@ module Pod
 
         def get_download_keys
           download_keys = []
-          csv_files = @download_csv_files.split(/,/).map(&:strip)
+          csv_files = download_cvs_str.split(/,/).map(&:strip)
           all_keys = CBin::OSS::Helper.instance.list.map(&:key)
           csv_files.each do |f|
             arr = all_keys.select { |k| %r{^csv/} =~ k && /#{f}/ =~ k }
