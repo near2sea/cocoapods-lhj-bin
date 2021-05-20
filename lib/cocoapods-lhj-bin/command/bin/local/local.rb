@@ -45,7 +45,7 @@ module Pod
           read_csv_file
           if @key_map.keys.length.positive?
             write_en_strings
-            write_zh_cn_strings
+            write_zh_cn_strings if CBin::LocalConfig.instance.config['gen_zh_cn']
             write_zh_hk_strings
             handle_modify_source if @modify_source_flag
           else
@@ -194,7 +194,7 @@ module Pod
           @key_map.values[index][:key] if index
         end
 
-        def format_str(type, area = :cn)
+        def format_str(type, area = :origin)
           str = ''
           @key_map.each do |k, v|
             val = v[type]
@@ -230,13 +230,18 @@ module Pod
 
         def write_zh_cn_strings
           file = File.join(@current_path, zh_cn_dir_name, generate_file_name)
-          generate_file(file, :zh)
+          area = :origin
+          area = :cn if CBin::LocalConfig.instance.config['trans_zh_cn']
+          content = format_str(:zh, area)
+          write_to_file(file, content)
           UI.puts "生成简体中文配置完成.文件路径：#{File.absolute_path(file)}\n".green
         end
 
         def write_zh_hk_strings
           file = File.join(@current_path, zh_hk_dir_name, generate_file_name)
-          content = format_str(:zh, :hk)
+          area = :origin
+          area = :hk if CBin::LocalConfig.instance.config['trans_zh_hk']
+          content = format_str(:zh, area)
           write_to_file(file, content)
           UI.puts "生成繁体中文配置完成.文件路径：#{File.absolute_path(file)}\n".green
         end

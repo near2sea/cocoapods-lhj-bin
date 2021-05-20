@@ -25,6 +25,9 @@ module CBin
         'csv_cn_col' => 1,
         'csv_en_col' => 2,
         'read_csv_file' => '*.csv',
+        'gen_zh_cn' => true,
+        'trans_zh_hk' => false,
+        'trans_zh_cn' => false,
         'download' => false,
         'download_csv' => 'zh_en.csv' }
     end
