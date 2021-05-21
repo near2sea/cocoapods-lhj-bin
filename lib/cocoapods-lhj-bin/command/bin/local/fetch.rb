@@ -50,7 +50,13 @@ module Pod
 
         def handle_files
           Dir.glob("#{@current_path}/**/*.{#{@file_type}}").each do |f|
-            handle_file f
+            dir_name = File.dirname(f)
+            if /Pods/ =~ f
+              mod_name = framework_name(dir_name)
+              handle_file f if /^ML/ =~ mod_name
+            else
+              handle_file f
+            end
           end
         end
 
