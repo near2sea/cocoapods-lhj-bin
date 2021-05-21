@@ -108,9 +108,11 @@ module Pod
         def update_source_header
           Dir.glob("#{@current_path}/**/*.{m,h}").each do |f|
             if f =~ /Pods/
-              handler_file(f) if f =~ %r{Pods/MLF} || f =~ %r{Pods/MLU} || f =~ %r{Pods/MLN}
+              dir_name = File.dirname(f)
+              mod_name = framework_name(dir_name)
+              handle_file f if /^ML/ =~ mod_name
             else
-              handler_file(f)
+              handler_file f
             end
           end
         end
