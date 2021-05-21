@@ -67,7 +67,7 @@ module Pod
         def handle_file(file)
           File.open(file, 'r') do |f|
             f.each_line do |line|
-              handle_line(file, line) if zh_ch_reg =~ line
+              handle_line(file, line) if zh_ch_reg =~ line && !(/Log/ =~ line)
             end
           end
         end
@@ -148,7 +148,6 @@ module Pod
           end
           result
         end
-
       end
     end
   end
