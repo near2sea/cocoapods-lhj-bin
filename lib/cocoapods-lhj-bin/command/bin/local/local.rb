@@ -170,7 +170,7 @@ module Pod
 
         def modify_format_string(file, line)
           result = line
-          result = handle_modify_line(file, line) if zh_ch_reg =~ line
+          result = handle_modify_line(file, line) if zh_ch_reg =~ line && !(/Log/ =~ line)
           result
         end
 
