@@ -67,23 +67,22 @@ module Pod
 
         def format_string(file, line)
           result = line
-          line.scan(url_reg) do |key|
-            result = result.gsub(key, @service_map[key])
+          if url_reg =~ line
+            line.scan(url_reg).flatten.each do |key|
+              result = result.gsub(key, @service_map[key]) if key && @service_map[key]
+            end
           end
           result
         end
 
-        def find_head_key(line)
-          line.match(url_reg)
-        end
-
         def url_reg
           @url_key_reg ||= begin
-            keys = @service_map.keys.join('|')
-            /@".*#{keys}.*"/
-          end
+                             keys = @service_map.keys.join('|')
+                             /(#{keys})/
+                           end
           @url_key_reg
         end
+
       end
     end
   end
