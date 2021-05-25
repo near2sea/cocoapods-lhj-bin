@@ -126,8 +126,10 @@ module Pod
           path = File.join(@current_path, read_csv_file_name)
           Dir.glob(path).each do |p|
             CSV.foreach(p) do |row|
-              key = row[@key_col]
-              @key_map[key] = { key: key, zh: row[@cn_col], en: row[@en_col] } unless key =~ /[\u4e00-\u9fa5]/
+              if row.length > 3
+                key = row[@key_col]
+                @key_map[key] = { key: key, zh: row[@cn_col], en: row[@en_col] } unless key =~ /[\u4e00-\u9fa5]/
+              end
             end
           end
         end
