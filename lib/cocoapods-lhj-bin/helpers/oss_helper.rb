@@ -19,8 +19,8 @@ module CBin
         @bucket.put_object(key, :file => file)
       end
 
-      def down_load(key, file)
-        @bucket.get_object(key, :file => file)
+      def down_load(key, file, &block)
+        @bucket.get_object(key, :file => file, &block)
       end
 
       def object_url(key)

@@ -33,11 +33,8 @@ module CBin
     end
 
     def load_config
-      if File.exist?(config_file)
-        YAML.load_file(config_file)
-      else
-        default_config
-      end
+      syn_config_file unless File.exist?(config_file)
+      YAML.load_file(config_file) || default_config
     end
 
     def config
