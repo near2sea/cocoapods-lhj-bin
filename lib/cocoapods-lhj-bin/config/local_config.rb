@@ -34,7 +34,15 @@ module CBin
 
     def load_config
       syn_config_file unless File.exist?(config_file)
-      YAML.load_file(config_file) || default_config
+      YAML.load_file(config_file)
+    end
+
+    def get_col_by_name(file_name, col_name = 'csv_key_col')
+      m = config
+      col = m[col_name]
+      fo = m['read_targets'].find{ |o| /#{o['csv_file']}/ =~ file_name }
+      col = fo[col_name] if fo
+      col
     end
 
     def config

@@ -42,7 +42,7 @@ module Pod
 
         def run
           down_load_csv_file if need_download
-          read_csv_file
+          read_csv
           if @key_map.keys.length.positive?
             write_en_strings
             write_zh_hk_strings
@@ -122,14 +122,21 @@ module Pod
           download_keys
         end
 
-        def read_csv_file
+        def read_csv
           path = File.join(@current_path, read_csv_file_name)
-          Dir.glob(path).each do |p|
-            CSV.foreach(p) do |row|
-              if row.length > 3
-                key = row[@key_col]
-                @key_map[key] = { key: key, zh: row[@cn_col], en: row[@en_col] } unless key =~ /[\u4e00-\u9fa5]/
-              end
+          Dir.glob(path).each do |f|
+            read_csv_file f
+          end
+        end
+
+        def read_csv_file(file)
+          key_c = CBin::LocalConfig.instance.get_col_by_name(file, 'csv_key_col')
+          cn_c = CBin::LocalConfig.instance.get_col_by_name(file, 'csv_cn_col')
+          en_c = CBin::LocalConfig.instance.get_col_by_name(file, 'csv_en_col')
+          CSV.foreach(file) do |row|
+            if row.length > 2
+              key = row[key_c]
+              @key_map[key] = { key: key, zh: row[cn_c], en: row[en_c] } unless key =~ /[\u4e00-\u9fa5]/
             end
           end
         end

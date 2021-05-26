@@ -18,8 +18,8 @@ module Pod
           end
 
           def push_cn_hk
-            file = File.expand_path("#{Pod::Config.instance.home_dir}/zh2hant.yml")
-            CBin::OSS::Helper.instance.upload('zh2hant.yml', file)
+            file = File.expand_path("#{Pod::Config.instance.home_dir}/localizable_config.yml")
+            CBin::OSS::Helper.instance.upload('localizable_config.yml', file)
           end
 
           def push
