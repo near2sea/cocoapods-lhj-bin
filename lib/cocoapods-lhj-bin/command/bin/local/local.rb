@@ -133,10 +133,16 @@ module Pod
           key_c = CBin::LocalConfig.instance.get_col_by_name(file, 'csv_key_col')
           cn_c = CBin::LocalConfig.instance.get_col_by_name(file, 'csv_cn_col')
           en_c = CBin::LocalConfig.instance.get_col_by_name(file, 'csv_en_col')
+          trans_hk = CBin::LocalConfig.instance.get_col_by_name(file, 'trans_zh_hk')
+          trans_cn = CBin::LocalConfig.instance.get_col_by_name(file, 'trans_zh_cn')
           CSV.foreach(file) do |row|
             if row.length > 2
               key = row[key_c]
-              @key_map[key] = { key: key, zh: row[cn_c], en: row[en_c] } unless key =~ /[\u4e00-\u9fa5]/
+              cn_str = row[cn_c]
+              hk_str = row[cn_c]
+              cn_str = CBin::Trans::Helper.instance.trans_zh_cn_str(cn_str) if trans_cn
+              hk_str = CBin::Trans::Helper.instance.trans_zh_hk_str(hk_str) if trans_hk
+              @key_map[key] = { key: key, cn: cn_str, hk: hk_str, en: row[en_c] } unless key =~ /[\u4e00-\u9fa5]/
             end
           end
         end
@@ -203,17 +209,10 @@ module Pod
           @key_map.values[index][:key] if index
         end
 
-        def format_str(type, area = :origin)
+        def format_str(type)
           str = ''
           @key_map.each do |k, v|
-            val = v[type]
-            case area
-            when :hk
-              val = CBin::Trans::Helper.instance.trans_zh_hk_str val
-            when :cn
-              val = CBin::Trans::Helper.instance.trans_zh_cn_str val
-            end
-            str += "\"#{k}\" = \"#{val}\";\n"
+            str += "\"#{k}\" = \"#{v[type]}\";\n"
           end
           str
         end
@@ -238,18 +237,12 @@ module Pod
         end
 
         def write_zh_cn_strings
-          if CBin::LocalConfig.instance.config['gen_zh_cn']
-            gen_zh_cn_strings_file
-          else
-            copy_hk_to_cn_file
-          end
+          gen_zh_cn_strings_file
         end
 
         def gen_zh_cn_strings_file
           file = File.join(@current_path, zh_cn_dir_name, generate_file_name)
-          area = :origin
-          area = :cn if CBin::LocalConfig.instance.config['trans_zh_cn']
-          content = format_str(:zh, area)
+          content = format_str(:cn)
           write_to_file(file, content)
           UI.puts "生成简体中文配置完成.文件路径：#{File.absolute_path(file)}\n".green
         end
@@ -263,9 +256,7 @@ module Pod
 
         def write_zh_hk_strings
           file = File.join(@current_path, zh_hk_dir_name, generate_file_name)
-          area = :origin
-          area = :hk if CBin::LocalConfig.instance.config['trans_zh_hk']
-          content = format_str(:zh, area)
+          content = format_str(:hk)
           write_to_file(file, content)
           UI.puts "生成繁体中文配置完成.文件路径：#{File.absolute_path(file)}\n".green
         end
