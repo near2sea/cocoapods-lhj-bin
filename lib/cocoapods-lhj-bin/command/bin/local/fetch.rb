@@ -77,6 +77,7 @@ module Pod
             fname = File.basename(file)
             dir_name = File.dirname(file)
             mod_name = framework_name(dir_name)
+            # ('a'..'z').to_a.shuffle[0..12].join
             key = "#{mod_name}.#{File.basename(file, '.*')}.#{rand(36**8).to_s(36)}"
             cn_str = str[2, str.length - 3]
             en_str = cn_str.gsub(/[\u4e00-\u9fa5]/, 'x')
