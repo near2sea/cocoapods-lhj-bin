@@ -10,6 +10,7 @@ module Pod
 
         def initialize(argv)
           @url = argv.shift_argument
+          @model_pre_name = argv.option('model-pre', 'ML')
           @models = []
         end
 
@@ -20,6 +21,7 @@ module Pod
           detail_msg = res_body['detailMsg']
           fetch_models(nil, detail_msg) if detail_msg
           print_models
+          print_models_implementation
         end
 
         def validate!
@@ -29,10 +31,12 @@ module Pod
         def fetch_models(name, obj)
           model = obj
           model = obj.first if obj.respond_to? :<<
-          @models.unshift({name: name, value: model})
-          model.each do |key, value|
-            if (value.instance_of? Hash) || (value.instance_of? Array)
-              fetch_models(key, value)
+          @models.unshift({name: name, value: model}) if model.instance_of? Hash
+          if model.instance_of? Hash
+            model.each do |key, value|
+              if (value.instance_of? Hash) || (value.instance_of? Array)
+                fetch_models(key, value)
+              end
             end
           end
         end
@@ -41,17 +45,21 @@ module Pod
           @models.each do |model|
             model_name = ''
             model_name = model[:name].gsub('List', '').gsub('Vo', '').gsub(/^\w/) { $&.upcase } if model[:name]
-            puts "@interface ML#{model_name}Model : NSObject"
+            puts "@interface #{@model_pre_name}#{model_name}Model : NSObject"
             model[:value].each do |key, value|
               print_property(key, value)
             end
-            puts "@end\n\n"
-            puts "@implementation ML#{model_name}Model"
-            if model[:name]
-              puts "+(NSDictionary *)modelContainerPropertyGenericClass {"
-              puts "  return @{@\"#{model[:name]}\" : ML#{model_name}Model.class};"
-              puts "}"
-            end
+            puts "@end\n\n\n"
+          end
+        end
+
+        def print_models_implementation
+          @models.each do |model|
+            model_name = model[:name].gsub('List', '').gsub('Vo', '').gsub(/^\w/) { $&.upcase } if model[:name]
+            puts "@implementation #{@model_pre_name}#{model_name}Model"
+            puts "+(NSDictionary *)modelContainerPropertyGenericClass {"
+            puts "  return @{@\"#{model[:name]}\" : #{@model_pre_name}#{model_name}Model.class};"
+            puts "}"
             puts "@end\n\n\n"
           end
         end
@@ -72,13 +80,21 @@ module Pod
             puts "///#{value}"
             puts "@property (nonatomic, assign) BOOL #{key};"
           elsif value.instance_of? Array
-            puts "///#{key}"
-            name = key.gsub('List', '').gsub('Vo', '').gsub(/^\w/) { $&.upcase }
-            puts "@property (nonatomic, strong) NSArray<ML#{name}Model *> *#{key};"
+            if value.first.instance_of? String
+              puts "///#{key}"
+              puts "@property (nonatomic, strong) NSArray<NSString *> *#{key};"
+            else
+              puts "///#{key}"
+              name = key.gsub('List', '').gsub('Vo', '').gsub(/^\w/) { $&.upcase }
+              puts "@property (nonatomic, strong) NSArray<#{@model_pre_name}#{name}Model *> *#{key};"
+            end
           elsif value.instance_of? Hash
             puts "///#{key}"
             name = key.gsub('List', '').gsub('Vo', '').gsub(/^\w/) { $&.upcase }
-            puts "@property (nonatomic, strong) ML#{name}Model *#{key};"
+            puts "@property (nonatomic, strong) #{@model_pre_name}#{name}Model *#{key};"
+          else
+            puts "///#{value}"
+            puts "@property (nonatomic, copy) NSString *#{key};"
           end
         end
       end
