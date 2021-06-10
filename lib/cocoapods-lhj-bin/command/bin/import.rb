@@ -115,6 +115,16 @@ module Pod
           result
         end
 
+=begin
+        def format_string(file, line)
+          result = line
+          if /[\s\[(<:](TicketList)([\s*\.;])/ =~ line
+            result = result.gsub(/([\s\[(<:])(TicketList)([\s*\.;])/, '\1TKTicketModel\3')
+          end
+          result
+        end
+=end
+
         def exist_in_file(file, header)
           folder_name = @header_folder_map[header.to_sym]
           Regexp.new("/Pods/#{folder_name}") =~ File.path(file) if folder_name
