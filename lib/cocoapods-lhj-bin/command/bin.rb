@@ -15,6 +15,7 @@ require 'cocoapods-lhj-bin/command/bin/local/upload'
 require 'cocoapods-lhj-bin/command/bin/trans'
 require 'cocoapods-lhj-bin/command/bin/lhj'
 require 'cocoapods-lhj-bin/command/bin/model'
+require 'cocoapods-lhj-bin/command/bin/view'
 require 'cocoapods-lhj-bin/command/bin/config/push'
 require 'cocoapods-lhj-bin/command/bin/oss/list'
 require 'cocoapods-lhj-bin/command/bin/oss/del'
@@ -57,7 +58,7 @@ module Pod
       end
 
       def validate!
-        super
+        # super
         # 这里由于 --help 是在 validate! 方法中提取的，会导致 --help 失效
         # pod lib create 也有这个问题
         banner! if @help
