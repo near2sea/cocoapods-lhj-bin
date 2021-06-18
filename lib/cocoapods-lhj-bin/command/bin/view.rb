@@ -19,6 +19,8 @@ module Pod
           print_instance
           puts "\n\n"
           print_layout
+          puts "\n\n"
+          print_value
         end
 
         def print_declare
@@ -37,7 +39,7 @@ module Pod
             puts "        _#{name}.translatesAutoresizingMaskIntoConstraints = NO;"
             print_property(name)
             puts "    }"
-            puts "    return _#{name}"
+            puts "    return _#{name};"
             puts "}"
             puts "\n"
           end
@@ -56,6 +58,7 @@ module Pod
         def print_property(name)
           if @type.eql?('UILabel')
             puts "        _#{name}.textColor = kSetCOLOR(0x333333);"
+            puts "        _#{name}.text = @\"xxxxxxxx\";"
             puts "        _#{name}.font = [UIFont systemFontOfSize:12.0 weight:UIFontWeightRegular];"
             puts "        _#{name}.textAlignment = NSTextAlignmentCenter;"
           elsif @type.eql?('UIImageView')
@@ -88,6 +91,14 @@ module Pod
             puts "[self.#{name}.topAnchor constraintEqualToAnchor:contentView.topAnchor].active = YES;"
             puts "[self.#{name}.bottomAnchor constraintEqualToAnchor:contentView.bottomAnchor].active = YES;"
             puts "\n\n"
+          end
+        end
+
+        def print_value
+          names.each do |name|
+            if @type.eql?('UILabel')
+              puts "self.#{name}.text = @\"xxxxx\";"
+            end
           end
         end
 

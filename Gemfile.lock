@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    cocoapods-aomi-bin (0.1.15)
+    cocoapods-aomi-bin (0.1.17)
       aliyun-sdk (~> 0.8.0)
       cocoapods
       cocoapods-generate (~> 2.0.1)
