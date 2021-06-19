@@ -15,13 +15,17 @@ module Pod
         end
 
         def run
+          model = fetch_model
+          fetch_models(nil, model) if model
+          print_models
+          print_models_implementation
+        end
+
+        def fetch_model
           uri = URI.parse(@url)
           res = Net::HTTP.get_response(uri)
           res_body = JSON.parse(res.body)
-          detail_msg = res_body['detailMsg']
-          fetch_models(nil, detail_msg) if detail_msg
-          print_models
-          print_models_implementation
+          res_body['detailMsg']
         end
 
         def validate!
