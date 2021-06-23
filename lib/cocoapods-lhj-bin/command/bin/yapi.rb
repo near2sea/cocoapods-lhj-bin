@@ -13,6 +13,7 @@ module Pod
           @model_pre_name = argv.option('model-pre')
           @http_url = ''
           @http_headers = []
+          @data_json = {}
           @models = []
           @config_id = ''
           @config_model_pre = 'ML'
@@ -26,6 +27,8 @@ module Pod
           fetch_model
           print_models
           print_models_implementation
+          print_params
+          print_methods
         end
 
         def url_str
@@ -61,20 +64,22 @@ module Pod
             http.request(req)
           end
           puts res.body
-          puts "\n\n"
           JSON.parse(res.body)
         end
 
         def fetch_model
           res_json = req_model
-          if res_json && res_json['data'] && res_json['data']['res_body']
-            begin
-              res_body = JSON.parse(res_json['data']['res_body'])
-              detail_obj = res_body['properties']['detailMsg'] || {}
-              detail_obj['name'] = gen_model_name('')
-              handle_model(detail_obj)
-            rescue => ex
-              puts ex
+          if res_json && res_json['data']
+            @data_json = res_json['data']
+            if @data_json['res_body']
+              begin
+                res_body = JSON.parse(@data_json['res_body'])
+                detail_obj = res_body['properties']['detailMsg'] || {}
+                detail_obj['name'] = gen_model_name('')
+                handle_model(detail_obj)
+              rescue => ex
+                puts ex
+              end
             end
           end
         end
@@ -122,6 +127,7 @@ module Pod
         end
 
         def print_models
+          puts "\n<===============打印模型=====================>\n"
           @models.each do |model|
             model_name = model[:name] || ''
             model_properties = model[:properties]
@@ -174,6 +180,38 @@ module Pod
             puts "@property (nonatomic, strong) NSArray<#{type_name} *> *#{key};"
           else
             puts "@property (nonatomic, copy) NSString *#{key};"
+          end
+        end
+
+        def print_params
+          @data_json['req_headers']
+
+        end
+
+        def print_methods
+          puts "\n<===============方法调用=====================>\n"
+          puts "/**"
+          puts " *  #{@data_json['title']} -- #{@data_json['username']}"
+          puts " */"
+          key_str = @data_json['path'].split('/').map{ |s| s.gsub(/[^A-Za-z0-9]/, '').upcase }.join('')
+          key = "k#{key_str}URL"
+          puts "static NSString * const #{key} = @\"#{@data_json['path']}\";"
+          puts "\n\n"
+          model = @models.last
+          if @data_json['method'].eql?('GET')
+            puts "    [MLNetworkingManager getWithUrl:#{key} params:nil response:^(MLResponseMessage *responseMessage) {"
+            puts "        if (response.resultCode == 0 && !response.error){"
+            puts "            NSDictionary *detailMsg = response.detailMsg"
+            puts "            #{model[:name]} *model = [#{model[:name]} yy_modelWithDictionary:detailMsg];"
+            puts "        }"
+            puts "    }];"
+          else
+            puts "    [MLNetworkingManager postWithUrl:#{key} params:nil response:^(MLResponseMessage *responseMessage) {"
+            puts "        if (response.resultCode == 0 && !response.error){"
+            puts "            NSDictionary *detailMsg = response.detailMsg"
+            puts "            #{model[:name]} *model = [#{model[:name]} yy_modelWithDictionary:detailMsg];"
+            puts "        }"
+            puts "    }];"
           end
         end
       end
