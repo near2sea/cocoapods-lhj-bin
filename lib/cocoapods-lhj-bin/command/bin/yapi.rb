@@ -16,6 +16,7 @@ module Pod
           @models = []
           @config_id = ''
           @config_model_pre = 'ML'
+          @type_trans = {}
           @config_model_names = []
           @model_names = []
         end
@@ -41,6 +42,7 @@ module Pod
           @config_id = config['id']
           @config_model_pre = config['model_pre']
           @config_model_names = config['model_names']
+          @type_trans = config['type_trans']
         end
 
         def api_id
@@ -96,7 +98,8 @@ module Pod
           properties = []
           if p_type.eql?('object')
             p_properties.each do |k, v|
-              c_model = {key: k, type: v['type'], description: v['description'], default: ''}
+              c_type = @type_trans[v['type']] || v['type']
+              c_model = {key: k, type: c_type, description: v['description'], default: ''}
               if v['type'].eql?('object') || v['type'].eql?('array')
                 o = v['items'] || v
                 o['name'] = gen_model_name(k)
