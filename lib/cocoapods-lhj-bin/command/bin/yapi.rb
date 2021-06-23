@@ -27,7 +27,6 @@ module Pod
           fetch_model
           print_models
           print_models_implementation
-          print_params
           print_methods
         end
 
@@ -183,19 +182,21 @@ module Pod
           end
         end
 
-        def print_params
-          @data_json['req_headers']
-
-        end
-
         def print_methods
           puts "\n<===============方法调用=====================>\n"
           puts "/**"
           puts " *  #{@data_json['title']} -- #{@data_json['username']}"
           puts " */"
-          key_str = @data_json['path'].split('/').map{ |s| s.gsub(/[^A-Za-z0-9]/, '').upcase }.join('')
+          key_str = @data_json['path'].split('/').map{ |s| s.gsub(/[^A-Za-z0-9]/, '').gsub(/^\w/){ $&.upcase } }.join('')
           key = "k#{key_str}URL"
           puts "static NSString * const #{key} = @\"#{@data_json['path']}\";"
+          puts "\n\n"
+          puts "@interface MLParamModel : NSObject"
+          @data_json['req_headers'].each do |h|
+            puts "///#{h['desc']}  #{h['value']}"
+            puts "@property (nonatomic, copy) NSString *#{h['name']}"
+          end
+          puts "@end"
           puts "\n\n"
           model = @models.last
           if @data_json['method'].eql?('GET')
