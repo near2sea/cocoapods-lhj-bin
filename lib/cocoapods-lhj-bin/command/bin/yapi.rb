@@ -194,7 +194,7 @@ module Pod
           puts "@interface MLParamModel : NSObject"
           @data_json['req_query'].each do |h|
             puts "///#{h['desc']}  #{h['example']}"
-            puts "@property (nonatomic, copy) NSString *#{h['name']}"
+            puts "@property (nonatomic, copy) NSString *#{h['name']};"
           end
           puts "@end"
           puts "\n\n"
