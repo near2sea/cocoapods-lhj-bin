@@ -11,11 +11,12 @@ module Pod
         def initialize(argv)
           @id = argv.option('id')
           @model_pre_name = argv.option('model-pre')
-          @headers = []
+          @http_headers = []
           @models = []
           @config_id = ''
           @config_model_pre = 'ML'
-          @main_model = 'Main'
+          @config_model_names = []
+          @model_names = []
         end
 
         def run
@@ -33,11 +34,11 @@ module Pod
           yml = File.join(Pod::Config.instance.home_dir, 'yapi.yml')
           config = YAML.load_file(yml)
           config.each do |k, v|
-            @headers << "#{k}=#{v}" unless (k.eql?('id') || k.eql?('pre') || k.eql?('model'))
+            @http_headers << "#{k}=#{v}" if (k.eql?('__wpkreporterwid_') || k.eql?('_yapi_token') || k.eql?('_yapi_uid'))
           end
           @config_id = config['id']
-          @config_model_pre = config['pre']
-          @main_model = config['model']
+          @config_model_pre = config['model_pre']
+          @config_model_names = config['model_names']
         end
 
         def api_id
@@ -51,12 +52,12 @@ module Pod
         def req_model
           uri = URI.parse(url_str)
           req = Net::HTTP::Get.new(uri)
-          req['Cookie'] = @headers.join('; ')
+          req['Cookie'] = @http_headers.join('; ')
           res = Net::HTTP.start(uri.hostname, uri.port) do |http|
             http.request(req)
           end
           puts res.body
-          puts '\n\n'
+          puts "\n\n"
           JSON.parse(res.body)
         end
 
@@ -66,7 +67,7 @@ module Pod
             begin
               res_body = JSON.parse(res_json['data']['res_body'])
               detail_obj = res_body['properties']['detailMsg'] || {}
-              detail_obj['name'] = gen_model_name(@main_model)
+              detail_obj['name'] = gen_model_name('')
               handle_model(detail_obj)
             rescue => ex
               puts ex
@@ -75,8 +76,13 @@ module Pod
         end
 
         def gen_model_name(name)
-          n = name.gsub('List', '').gsub(/(Vo|VO|vo|model|Model)/, '').gsub(/^\w/) { $&.upcase }
-          "#{model_pre}#{n}Model"
+          n = name.gsub(/vo|model|list/i, '').gsub(/^\w/) { $&.upcase }
+          if n.length <= 0
+            n = @config_model_names.detect{ |c| !@model_names.any?{ |n| n.gsub(/#{model_pre}(.*)Model/, '\1').eql?(c) } }
+          end
+          model_name = "#{model_pre}#{n}Model"
+          @model_names << model_name
+          model_name
         end
 
         def handle_model(model)
@@ -95,7 +101,7 @@ module Pod
                 if v['type'].eql?('array') && v['items']['type'].eql?('string')
                   c_model[:type_name] = "NSString"
                 else
-                  c_model[:type_name] = gen_model_name(k)
+                  c_model[:type_name] = o['name']
                   handle_model(o)
                 end
               end
