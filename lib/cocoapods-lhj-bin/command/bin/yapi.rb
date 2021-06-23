@@ -11,6 +11,7 @@ module Pod
         def initialize(argv)
           @id = argv.option('id')
           @model_pre_name = argv.option('model-pre')
+          @http_url = ''
           @http_headers = []
           @models = []
           @config_id = ''
@@ -27,7 +28,7 @@ module Pod
         end
 
         def url_str
-          "http://yapi.miguatech.com/api/interface/get?id=#{api_id}"
+          "#{@http_url}#{api_id}"
         end
 
         def load_config
@@ -36,13 +37,14 @@ module Pod
           config.each do |k, v|
             @http_headers << "#{k}=#{v}" if (k.eql?('__wpkreporterwid_') || k.eql?('_yapi_token') || k.eql?('_yapi_uid'))
           end
+          @http_url = config['url']
           @config_id = config['id']
           @config_model_pre = config['model_pre']
           @config_model_names = config['model_names']
         end
 
         def api_id
-          @id || @config_id
+          @id || @config_id.to_s
         end
 
         def model_pre
