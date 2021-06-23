@@ -192,8 +192,8 @@ module Pod
           puts "static NSString * const #{key} = @\"#{@data_json['path']}\";"
           puts "\n\n"
           puts "@interface MLParamModel : NSObject"
-          @data_json['req_headers'].each do |h|
-            puts "///#{h['desc']}  #{h['value']}"
+          @data_json['req_query'].each do |h|
+            puts "///#{h['desc']}  #{h['example']}"
             puts "@property (nonatomic, copy) NSString *#{h['name']}"
           end
           puts "@end"
@@ -203,14 +203,14 @@ module Pod
             puts "    [MLNetworkingManager getWithUrl:#{key} params:nil response:^(MLResponseMessage *responseMessage) {"
             puts "        if (response.resultCode == 0 && !response.error){"
             puts "            NSDictionary *detailMsg = response.detailMsg"
-            puts "            #{model[:name]} *model = [#{model[:name]} yy_modelWithDictionary:detailMsg];"
+            puts "            #{model[:name]} *model = [#{model[:name]} yy_modelWithDictionary:detailMsg];" if model
             puts "        }"
             puts "    }];"
           else
             puts "    [MLNetworkingManager postWithUrl:#{key} params:nil response:^(MLResponseMessage *responseMessage) {"
             puts "        if (response.resultCode == 0 && !response.error){"
             puts "            NSDictionary *detailMsg = response.detailMsg"
-            puts "            #{model[:name]} *model = [#{model[:name]} yy_modelWithDictionary:detailMsg];"
+            puts "            #{model[:name]} *model = [#{model[:name]} yy_modelWithDictionary:detailMsg];" if model
             puts "        }"
             puts "    }];"
           end
