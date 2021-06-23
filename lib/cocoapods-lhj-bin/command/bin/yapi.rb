@@ -76,7 +76,7 @@ module Pod
         end
 
         def gen_model_name(name)
-          n = name.gsub(/vo|model|list/i, '').gsub(/^\w/) { $&.upcase }
+          n = name.gsub(/vo|model|list/i, '').gsub(/(.*)s$/, '\1').gsub(/^\w/) { $&.upcase }
           if n.length <= 0
             n = @config_model_names.detect{ |c| !@model_names.any?{ |n| n.gsub(/#{model_pre}(.*)Model/, '\1').eql?(c) } }
           end
