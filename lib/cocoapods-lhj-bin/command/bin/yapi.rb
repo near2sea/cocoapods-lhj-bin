@@ -207,6 +207,10 @@ module Pod
           puts "///#{des} #{default}"
           if type.eql?('integer')
             puts "@property (nonatomic, assign) NSInteger #{key};"
+            if des.include?('分')
+              puts "/////////==========删掉其中一个属性"
+              puts "@property (nonatomic, strong) MLCentNumber *#{key};"
+            end
           elsif type.eql?('cent')
             puts "@property (nonatomic, strong) MLCentNumber *#{key};"
           elsif type.eql?('string')
