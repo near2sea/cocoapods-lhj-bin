@@ -28,6 +28,13 @@ module Pod
           print_methods
         end
 
+        def test_ding
+          require 'net/http'
+          require 'uri'
+          body = { "msgtype" => "text", "text" => { "content" => "error:上传蒲公英超时失败!" } }.to_json
+          Net::HTTP.post(URI('https://oapi.dingtalk.com/robot/send?access_token=6a3519057170cdb1b7274edfe43934c84a0062ffe2c9bcced434699296a7e26e'), body, "Content-Type" => "application/json")
+        end
+
         def url_str
           "#{@http_url}#{api_id}"
         end
