@@ -59,7 +59,7 @@ module Pod
       end
 
       def validate!
-        # super
+        super
         # 这里由于 --help 是在 validate! 方法中提取的，会导致 --help 失效
         # pod lib create 也有这个问题
         banner! if @help

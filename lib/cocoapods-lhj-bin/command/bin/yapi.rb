@@ -8,6 +8,13 @@ module Pod
       class Yapi < Bin
         self.summary = '通过yapi接口生成请求'
 
+        def self.options
+          [
+            %w[--id api的id],
+            %w[--model-pre 模型的前缀]
+          ]
+        end
+
         def initialize(argv)
           @id = argv.option('id')
           @model_pre_name = argv.option('model-pre')
@@ -20,6 +27,7 @@ module Pod
           @type_trans = {}
           @config_model_names = []
           @model_names = []
+          super
         end
 
         def run
