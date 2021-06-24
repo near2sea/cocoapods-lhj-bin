@@ -202,7 +202,7 @@ module Pod
           type_name = m[:type_name]
           type = m[:type]
           des = m[:description] || ''
-          des.gsub!(/\n/, '')
+          des.gsub!(/\n/, '  ')
           default = m[:default]
           puts "///#{des} #{default}"
           if type.eql?('integer')
@@ -243,7 +243,8 @@ module Pod
           puts "\n\n"
           puts "@interface MLParamModel : NSObject"
           @data_json['req_query'].each do |h|
-            puts "///#{h['desc']}  #{h['example']}"
+            des = h['desc'].gsub(/\n/, '  ')
+            puts "///#{des}  #{h['example']}"
             puts "@property (nonatomic, copy) NSString *#{h['name']};"
           end
           puts "@end"
