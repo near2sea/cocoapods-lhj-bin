@@ -25,8 +25,6 @@ module Pod
         def run
           load_config
           fetch_model
-          print_models
-          print_models_implementation
           print_methods
         end
 
@@ -68,6 +66,25 @@ module Pod
 
         def fetch_model
           res_json = req_model
+          begin
+            puts "\n<===============打印返回数据模型-Begin=====================>\n"
+            fetch_res_boy(res_json)
+            print_models
+            print_models_implementation
+            puts "\n<===============打印返回数据模型-End=====================>\n"
+          end
+          begin
+            puts "\n<===============打印请求模型-Begin=====================>\n"
+            @models = []
+            @model_names = []
+            fetch_req_body(res_json)
+            print_models
+            print_models_implementation
+            puts "\n<===============打印请求模型-End=====================>\n"
+          end
+        end
+
+        def fetch_res_boy(res_json)
           if res_json && res_json['data']
             @data_json = res_json['data']
             if @data_json['res_body']
@@ -76,6 +93,21 @@ module Pod
                 detail_obj = res_body['properties']['detailMsg'] || {}
                 detail_obj['name'] = gen_model_name('')
                 handle_model(detail_obj)
+              rescue => ex
+                puts ex
+              end
+            end
+          end
+        end
+
+        def fetch_req_body(res_json)
+          if res_json && res_json['data']
+            @data_json = res_json['data']
+            if @data_json['req_body_other']
+              begin
+                res_body = JSON.parse(@data_json['req_body_other'])
+                res_body['name'] = gen_model_name('')
+                handle_model(res_body)
               rescue => ex
                 puts ex
               end
@@ -126,7 +158,6 @@ module Pod
         end
 
         def print_models
-          puts "\n<===============打印模型=====================>\n"
           @models.each do |model|
             model_name = model[:name] || ''
             model_properties = model[:properties]
