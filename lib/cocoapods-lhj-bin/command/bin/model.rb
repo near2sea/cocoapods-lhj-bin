@@ -1,6 +1,7 @@
 require 'net/https'
 require 'uri'
 require 'json'
+require 'plist'
 
 module Pod
   class Command
@@ -15,6 +16,20 @@ module Pod
         end
 
         def run
+          gen_model
+          # handle_plist
+        end
+
+        def handle_plist
+          entitlements_file = File.expand_path('~/config.plist')
+          result = Plist.parse_xml(entitlements_file)
+          result.delete('com.apple.security.application-groups')
+          result['type'] = '0'
+          result.delete('version')
+          result.save_plist(entitlements_file)
+        end
+
+        def gen_model
           model = fetch_model
           fetch_models(nil, model) if model
           print_models

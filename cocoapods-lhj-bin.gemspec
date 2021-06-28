@@ -23,6 +23,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'cocoapods-generate', '~>2.0.1'
   spec.add_dependency 'parallel'
   spec.add_dependency 'aliyun-sdk', '~>0.8.0'
+  spec.add_dependency 'plist', '>= 3.1.0'
 
   spec.add_development_dependency 'bundler'
   spec.add_development_dependency 'rake'
