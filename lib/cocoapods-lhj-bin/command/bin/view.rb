@@ -50,6 +50,8 @@ module Pod
             puts "        _#{name} = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@\"xxxx\"]];"
           elsif @type.eql?('UIButton')
             puts "        _#{name} = [UIButton buttonWithType:UIButtonTypeCustom];"
+          elsif @type.eql?('UITableView')
+            puts "        _#{name} = [[UITableView alloc] initWithFrame:CGRectZero style:UITableViewStyleGrouped];"
           else
             puts "        _#{name} = [[#{@type} alloc] init];"
           end
@@ -73,6 +75,13 @@ module Pod
             puts "        _#{name}.font = [UIFont systemFontOfSize:12.0 weight:UIFontWeightRegular];"
           elsif @type.eql?('UIView')
             puts "        _#{name}.backgroundColor = kBackgroundColor;"
+          elsif @type.eql?('UITableView')
+            puts "        _#{name}.backgroundColor = kBackgroundColor;"
+            puts "        _#{name}.delegate = self;"
+            puts "        _#{name}.delegate = self;"
+            puts "        _#{name}.tableHeaderView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 0, CGFLOAT_MIN)];"
+            puts "        _#{name}.tableFooterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 0, CGFLOAT_MIN)];"
+            puts "        _#{name}.separatorStyle = UITableViewCellSeparatorStyleNone;"
           elsif @type.eql?('UIButton')
             puts "        _#{name}.backgroundColor = kBackgroundColor;"
             puts "        [_#{name} setTitle:@\"xxx\" forState:UIControlStateNormal];"
