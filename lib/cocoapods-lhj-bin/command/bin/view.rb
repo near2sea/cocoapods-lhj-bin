@@ -7,6 +7,7 @@ module Pod
         def initialize(argv)
           @name = argv.option('name', 'titleLabel')
           @type = argv.option('type', 'UILabel')
+          super
         end
 
         def names
