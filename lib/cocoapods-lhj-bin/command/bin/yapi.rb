@@ -11,13 +11,15 @@ module Pod
         def self.options
           [
             %w[--id api的id],
-            %w[--model-pre 模型的前缀]
+            %w[--model-pre 模型的前缀],
+            %w[--save 保存生成文件]
           ]
         end
 
         def initialize(argv)
           @id = argv.option('id')
           @model_pre_name = argv.option('model-pre')
+          @save = argv.flag?('save', false)
           @http_url = ''
           @http_headers = []
           @data_json = {}
@@ -34,6 +36,7 @@ module Pod
           load_config
           fetch_model
           print_methods
+          save_to_file if @save
         end
 
         def test_ding
@@ -41,6 +44,28 @@ module Pod
           require 'uri'
           body = { "msgtype" => "text", "text" => { "content" => "error:上传蒲公英超时失败!" } }.to_json
           Net::HTTP.post(URI('https://oapi.dingtalk.com/robot/send?access_token=6a3519057170cdb1b7274edfe43934c84a0062ffe2c9bcced434699296a7e26e'), body, "Content-Type" => "application/json")
+        end
+
+        def puts_h(str)
+          puts str
+          @h_file_array ||= []
+          @h_file_array << str
+        end
+
+        def puts_m(str)
+          puts str
+          @m_file_array ||= []
+          @m_file_array << str
+        end
+
+        def save_to_file
+          @model_names = []
+          file_name = gen_model_name('')
+          h_file = File.join('.', "#{file_name}.h")
+          m_file = File.join('.', "#{file_name}.m")
+          File.write(h_file, @h_file_array.join("\n")) if @h_file_array.count > 0
+          File.write(m_file, @m_file_array.join("\n")) if @m_file_array.count > 0
+          puts "\n\n生成文件成功！所在路径:\n#{File.expand_path(h_file)} \n#{File.expand_path(m_file)}"
         end
 
         def url_str
@@ -176,24 +201,25 @@ module Pod
           @models.each do |model|
             model_name = model[:name] || ''
             model_properties = model[:properties]
-            puts "@interface #{model_name} : NSObject"
+            puts_h "@interface #{model_name} : NSObject"
             model_properties.each do |m|
               print_model(m)
             end
-            puts "@end\n\n\n"
+            puts_h "@end\n\n\n"
           end
         end
 
         def print_models_implementation
           @models.each do |model|
-            puts "@implementation #{model[:name]}"
+            puts_m "@implementation #{model[:name]}"
             str = model[:properties].filter { |p| p[:type].eql?('array') && !p[:type_name].eql?('NSString') }.map{ |p| "@\"#{p[:key]}\": #{p[:type_name]}.class" }.join(', ')
             if str && str.length > 0
-              puts "+(NSDictionary *)modelContainerPropertyGenericClass {"
-              puts "  return @{#{str}};"
-              puts "}"
+              puts_m "+(NSDictionary *)modelContainerPropertyGenericClass {"
+              puts_m "  return @{#{str}};"
+              puts_m "}"
             end
-            puts "@end\n\n\n"
+            puts_m "@end\n"
+            puts "\n\n"
           end
         end
 
@@ -204,66 +230,66 @@ module Pod
           des = m[:description] || ''
           des.gsub!(/\n/, '  ')
           default = m[:default]
-          puts "///#{des} #{default}"
+          puts_h "///#{des} #{default}"
           if type.eql?('integer')
-            puts "@property (nonatomic, assign) NSInteger #{key};"
+            puts_h "@property (nonatomic, assign) NSInteger #{key};"
             if des.include?('分')
-              puts "/////////==========删掉其中一个属性"
-              puts "@property (nonatomic, strong) MLCentNumber *#{key};"
+              puts_h "/////////==========删掉其中一个属性"
+              puts_h "@property (nonatomic, strong) MLCentNumber *#{key};"
             end
           elsif type.eql?('cent')
-            puts "@property (nonatomic, strong) MLCentNumber *#{key};"
+            puts_h "@property (nonatomic, strong) MLCentNumber *#{key};"
           elsif type.eql?('string')
-            puts "@property (nonatomic, copy) NSString *#{key};"
+            puts_h "@property (nonatomic, copy) NSString *#{key};"
           elsif type.eql?('number')
-            puts "@property (nonatomic, strong) NSNumber *#{key};"
+            puts_h "@property (nonatomic, strong) NSNumber *#{key};"
           elsif type.eql?('float')
-            puts "@property (nonatomic, assign) CGFloat #{key};"
+            puts_h "@property (nonatomic, assign) CGFloat #{key};"
           elsif type.eql?('double')
-            puts "@property (nonatomic, assign) double #{key};"
+            puts_h "@property (nonatomic, assign) double #{key};"
           elsif type.eql?('boolean')
-            puts "@property (nonatomic, assign) BOOL #{key};"
+            puts_h "@property (nonatomic, assign) BOOL #{key};"
           elsif type.eql?('object')
-            puts "@property (nonatomic, strong) #{type_name} *#{key};"
+            puts_h "@property (nonatomic, strong) #{type_name} *#{key};"
           elsif type.eql?('array')
-            puts "@property (nonatomic, strong) NSArray<#{type_name} *> *#{key};"
+            puts_h "@property (nonatomic, strong) NSArray<#{type_name} *> *#{key};"
           else
-            puts "@property (nonatomic, copy) NSString *#{key};"
+            puts_h "@property (nonatomic, copy) NSString *#{key};"
           end
         end
 
         def print_methods
           puts "\n<===============方法调用=====================>\n"
-          puts "/**"
-          puts " *  #{@data_json['title']} -- #{@data_json['username']}"
-          puts " */"
+          puts_m "/**"
+          puts_m " *  #{@data_json['title']} -- #{@data_json['username']}"
+          puts_m " */"
           key_str = @data_json['path'].split('/').map{ |s| s.gsub(/[^A-Za-z0-9]/, '').gsub(/^\w/){ $&.upcase } }.join('')
           key = "k#{key_str}URL"
-          puts "static NSString * const #{key} = @\"#{@data_json['path']}\";"
-          puts "\n\n"
-          puts "@interface MLParamModel : NSObject"
+          puts_m "static NSString * const #{key} = @\"#{@data_json['path']}\";"
+          puts_m "\n\n"
+          puts_h "@interface MLParamModel : NSObject"
           @data_json['req_query'].each do |h|
             des = h['desc'].gsub(/\n/, '  ')
-            puts "///#{des}  #{h['example']}"
-            puts "@property (nonatomic, copy) NSString *#{h['name']};"
+            puts_h "///#{des}  #{h['example']}"
+            puts_h "@property (nonatomic, copy) NSString *#{h['name']};"
           end
-          puts "@end"
+          puts_h "@end"
           puts "\n\n"
           model = @models.last
           if @data_json['method'].eql?('GET')
-            puts "    [MLNetworkingManager getWithUrl:#{key} params:nil response:^(MLResponseMessage *responseMessage) {"
-            puts "        if (response.resultCode == 0 && !response.error){"
-            puts "            NSDictionary *detailMsg = response.detailMsg"
-            puts "            #{model[:name]} *model = [#{model[:name]} yy_modelWithDictionary:detailMsg];" if model
-            puts "        }"
-            puts "    }];"
+            puts_m "    [MLNetworkingManager getWithUrl:#{key} params:nil response:^(MLResponseMessage *responseMessage) {"
+            puts_m "        if (response.resultCode == 0 && !response.error){"
+            puts_m "            NSDictionary *detailMsg = response.detailMsg"
+            puts_m "            #{model[:name]} *model = [#{model[:name]} yy_modelWithDictionary:detailMsg];" if model
+            puts_m "        }"
+            puts_m "    }];"
           else
-            puts "    [MLNetworkingManager postWithUrl:#{key} params:nil response:^(MLResponseMessage *responseMessage) {"
-            puts "        if (response.resultCode == 0 && !response.error){"
-            puts "            NSDictionary *detailMsg = response.detailMsg"
-            puts "            #{model[:name]} *model = [#{model[:name]} yy_modelWithDictionary:detailMsg];" if model
-            puts "        }"
-            puts "    }];"
+            puts_m "    [MLNetworkingManager postWithUrl:#{key} params:nil response:^(MLResponseMessage *responseMessage) {"
+            puts_m "        if (response.resultCode == 0 && !response.error){"
+            puts_m "            NSDictionary *detailMsg = response.detailMsg"
+            puts_m "            #{model[:name]} *model = [#{model[:name]} yy_modelWithDictionary:detailMsg];" if model
+            puts_m "        }"
+            puts_m "    }];"
           end
         end
       end
