@@ -127,7 +127,7 @@ module Pod
             puts "[self.#{name}.topAnchor constraintEqualToAnchor:contentView.topAnchor].active = YES;"
             puts "[self.#{name}.bottomAnchor constraintEqualToAnchor:contentView.bottomAnchor].active = YES;"
             puts "[self.#{name}.widthAnchor constraintEqualToConstant:80].active = YES;"
-            puts "[self.#{name}.heightAnchor constraintEqualToAnchor:80].active = YES;"
+            puts "[self.#{name}.heightAnchor constraintEqualToConstant:80].active = YES;"
             puts "\n\n"
           end
         end
