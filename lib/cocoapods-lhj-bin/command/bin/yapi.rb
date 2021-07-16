@@ -26,6 +26,7 @@ module Pod
           @models = []
           @config_id = ''
           @config_model_pre = 'ML'
+          @model_default_suffix = 'Model'
           @type_trans = {}
           @config_model_names = []
           @model_names = []
@@ -81,6 +82,7 @@ module Pod
           @http_url = config['url']
           @config_id = config['id']
           @config_model_pre = config['model_pre']
+          @config_model_suffix = config['model_suffix']
           @config_model_names = config['model_names']
           @type_trans = config['type_trans']
         end
@@ -91,6 +93,10 @@ module Pod
 
         def model_pre
           @model_pre_name || @config_model_pre
+        end
+
+        def model_suffix
+          @config_model_suffix || @model_default_suffix
         end
 
         def req_model
@@ -160,7 +166,7 @@ module Pod
           if n.length <= 0
             n = @config_model_names.detect{ |c| !@model_names.any?{ |n| n.gsub(/#{model_pre}(.*)Model/, '\1').eql?(c) } }
           end
-          model_name = "#{model_pre}#{n}Model"
+          model_name = "#{model_pre}#{n}#{model_suffix}"
           @model_names << model_name
           model_name
         end
