@@ -128,6 +128,10 @@ module Pod
             puts "[self.#{name}.bottomAnchor constraintEqualToAnchor:contentView.bottomAnchor].active = YES;"
             puts "[self.#{name}.widthAnchor constraintEqualToConstant:80].active = YES;"
             puts "[self.#{name}.heightAnchor constraintEqualToConstant:80].active = YES;"
+            if type.eql?('UILabel')
+              puts "[self.#{name} setContentHuggingPriority:300 forAxis:UILayoutConstraintAxisHorizontal];"
+              puts "[self.#{name} setContentCompressionResistancePriority:300 forAxis:UILayoutConstraintAxisHorizontal];"
+            end
             puts "\n\n"
           end
         end
