@@ -27,11 +27,12 @@ module Pod
 
         def handler_files
           Dir.glob("#{@current_path}/**/*.{#{@file_type}}").each do |f|
-            handler_file f
+              handler_file f
+            end
           end
-        end
 
         def handler_file(file)
+          File.chmod(0o644, file) unless File.writable?(file)
           str = format_file_string(file)
           File.open(file, 'w+') do |f|
             f.write(str)
