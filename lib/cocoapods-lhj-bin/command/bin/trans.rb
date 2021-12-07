@@ -23,6 +23,15 @@ module Pod
 
         def run
           handler_files
+          # rename
+        end
+
+        def rename
+          folder_path = "/Users/lihaijian/Downloads/ss"
+          Dir.glob("#{folder_path}/**/*.{png}").sort.each do |f|
+            filename = File.basename(f, File.extname(f))
+            File.rename(f, "#{folder_path}/aomi_soldout_" + filename.capitalize + File.extname(f))
+          end
         end
 
         def handler_files
